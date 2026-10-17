@@ -20,7 +20,9 @@ rel="stylesheet">
 
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
 
@@ -1799,9 +1801,7 @@ class="grid grid-3">
      PRESENCE — SUIVI ÉTUDIANT EN LECTURE SEULE
 ========================================================= -->
 
-<section
-id="presence"
-class="page">
+<section id="presence" class="page">
 
 <h1 class="section-title"
 data-fr="Suivi de la présence"
@@ -1813,19 +1813,15 @@ Suivi de la présence
 
 <h3>
 <i class="fa-solid fa-calendar-days"></i>
-<span data-fr="Suivi des séances"
-data-en="Session Tracking">Suivi des séances</span>
+<span data-fr="Paramètres de la séance" data-en="Session settings">Paramètres de la séance</span>
 </h3>
 
 <div class="grid grid-3">
 
 <div>
 <label><strong data-fr="Section" data-en="Section">Section</strong></label>
-<select
-id="presenceSection"
-class="input"
-style="width:100%;margin-top:7px;"
-onchange="syncGroupWithSection();updateStudentFollowUp();">
+<select id="presenceSection" class="input" style="width:100%;margin-top:7px;"
+onchange="syncGroupWithSection();updatePresenceList();updateStudentFollowUp();">
 <option value="01">Section 01</option>
 <option value="02">Section 02</option>
 </select>
@@ -1833,94 +1829,31 @@ onchange="syncGroupWithSection();updateStudentFollowUp();">
 
 <div>
 <label><strong data-fr="Groupe" data-en="Group">Groupe</strong></label>
-<select
-id="presenceGroup"
-class="input"
-style="width:100%;margin-top:7px;"
-onchange="updatePresenceList();updateStudentFollowUp();">
+<select id="presenceGroup" class="input" style="width:100%;margin-top:7px;"
+onchange="updatePresenceList();">
 <option value="01">Groupe 01</option>
 <option value="02">Groupe 02</option>
 </select>
 </div>
 
 <div>
-<label><strong data-fr="Date de la séance" data-en="Session Date">Date de la séance</strong></label>
-<select
-id="presenceDate"
-class="input"
-style="width:100%;margin-top:7px;"
-onchange="updatePresenceList();updateStudentFollowUp();">
-</select>
+<label><strong data-fr="Date (calendrier)" data-en="Date (calendar)">Date (calendrier)</strong></label>
+<input type="date" id="presenceDate" class="input" style="width:100%;margin-top:7px;"
+min="2026-09-30" max="2027-06-30" onchange="updatePresenceList();">
 </div>
 
 </div>
 
-<div
-id="presenceSessionInfo"
+<div id="presenceSessionInfo"
 style="margin-top:20px;padding:15px;border-radius:12px;background:#eef6fc;border-left:5px solid #0077b6;">
 </div>
 
-<div style="margin-top:15px;padding:12px 15px;border-radius:10px;background:#f7f7f7;border-left:5px solid #777;">
-<strong>🔒 Affichage en lecture seule :</strong>
-la présence est fixée par l'enseignant et ne peut pas être modifiée par l'étudiant sur la plateforme.
-</div>
-
-</div>
-
-
-<div class="card">
-
-<h3>
-<i class="fa-solid fa-user-check"></i>
-Suivi individuel de l'étudiant
-</h3>
-
-<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
-
-<input
-class="input"
-id="studentMatricule"
-type="text"
-inputmode="numeric"
-maxlength="8"
-style="flex:1;min-width:250px;"
-placeholder="Saisir votre matricule"
-oninput="updateStudentFollowUp()">
-
-</div>
-
-<div id="studentFollowUp" style="margin-top:15px;">
-<div style="padding:15px;border-radius:10px;background:#f5f5f5;color:#666;">
-Saisissez votre matricule pour afficher votre suivi annuel.
-</div>
-</div>
-
-</div>
-
-
-<div class="card">
-
-<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
-
-<input
-class="input"
-id="studentSearch"
-style="flex:1;min-width:250px;"
-placeholder="Rechercher un étudiant / Search..."
-oninput="updatePresenceList()">
-
-<span style="padding:8px 12px;border-radius:8px;background:#e7f7ed;color:#16803c;font-weight:700;">
-🟢 PRÉSENT
+<div style="margin-top:12px;font-size:13px;color:#555;">
+<i class="fa-solid fa-hand-pointer"></i>
+<span data-fr="Cliquez sur le badge d'un étudiant pour changer : 🟢 Présent → 🔴 Absent → 🟡 Justifié"
+data-en="Click a student badge to change: 🟢 Present → 🔴 Absent → 🟡 Justified">
+Cliquez sur le badge d'un étudiant pour changer : 🟢 Présent → 🔴 Absent → 🟡 Justifié
 </span>
-
-<span style="padding:8px 12px;border-radius:8px;background:#fdeaea;color:#c62828;font-weight:700;">
-🔴 ABSENT
-</span>
-
-<span style="padding:8px 12px;border-radius:8px;background:#eeeeee;color:#666;font-weight:700;">
-⚪ NON SAISIE
-</span>
-
 </div>
 
 </div>
@@ -1943,7 +1876,7 @@ oninput="updatePresenceList()">
 <div class="stat-card">
 <i class="fa-solid fa-user-xmark" style="color:#c62828;"></i>
 <div class="stat-number" id="totalAbsent">0</div>
-<div>Absents</div>
+<div>Absents + justifiés</div>
 </div>
 
 <div class="stat-card">
@@ -1951,6 +1884,22 @@ oninput="updatePresenceList()">
 <div class="stat-number" id="presencePercentage">—</div>
 <div>Taux</div>
 </div>
+
+</div>
+
+
+<div class="card" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+
+<button class="btn btn-danger" onclick="downloadAttendancePDF()">
+<i class="fa-solid fa-file-pdf"></i> PDF
+</button>
+
+<button class="btn btn-success" onclick="downloadAttendanceExcel()">
+<i class="fa-solid fa-file-excel"></i> Excel
+</button>
+
+<input class="input" id="studentSearch" style="flex:1;min-width:220px;"
+placeholder="Rechercher un étudiant / Search..." oninput="updatePresenceList()">
 
 </div>
 
@@ -1969,7 +1918,6 @@ oninput="updatePresenceList()">
 <th>Nom</th>
 <th>Prénom</th>
 <th>Section</th>
-<th>Groupe</th>
 <th>Présence</th>
 <th>Absences annuelles</th>
 </tr>
@@ -1980,358 +1928,7 @@ oninput="updatePresenceList()">
 
 </div>
 
-
-<div class="card">
-
-<h3>
-<i class="fa-solid fa-clock-rotate-left"></i>
-Historique des séances
-</h3>
-
-<div id="attendanceHistory"></div>
-
-</div>
-
-<!-- =========================================================
-     DOCUMENTS DE PRÉSENCE
-========================================================= -->
-
-<div class="card">
-
-    <h2
-        data-fr="📄 Documents de présence"
-        data-en="📄 Attendance Documents">
-        📄 Documents de présence
-    </h2>
-
-    <p
-        class="section-subtitle"
-        data-fr="Documents PDF relatifs aux séances de présence."
-        data-en="PDF documents related to attendance sessions.">
-        Documents PDF relatifs aux séances de présence.
-    </p>
-
-
-    <!-- =====================================================
-         SÉANCE 1 — 23/09/2026
-    ====================================================== -->
-
-    <div class="card" style="margin-top:20px;">
-
-        <h3>
-            <i class="fa-solid fa-calendar-days"></i>
-
-            <span
-                data-fr="Présence – Séance 1"
-                data-en="Attendance – Session 1">
-                Présence – Séance 1
-            </span>
-        </h3>
-
-        <p>
-            <strong
-                data-fr="Date : 23/09/2026"
-                data-en="Date: 23/09/2026">
-                Date : 23/09/2026
-            </strong>
-        </p>
-
-        <div class="grid grid-2" style="margin-top:20px;">
-
-            <!-- SECTION 01 -->
-            <div class="resource-card">
-
-                <div class="resource-icon">
-                    <i class="fa-solid fa-users"></i>
-                </div>
-
-                <h3>Section 01</h3>
-
-                <a
-                    href="absence/Présence-S1-23092026.pdf"
-                    target="_blank"
-                    rel="noopener"
-                    class="btn btn-primary">
-
-                    <i class="fa-solid fa-file-pdf"></i>
-
-                    <span
-                        data-fr="Ouvrir le PDF"
-                        data-en="Open PDF">
-                        Ouvrir le PDF
-                    </span>
-
-                </a>
-
-            </div>
-
-
-            <!-- SECTION 02 -->
-            <div class="resource-card">
-
-                <div class="resource-icon">
-                    <i class="fa-solid fa-users"></i>
-                </div>
-
-                <h3>Section 02</h3>
-
-                <a
-                    href="absence/Présence-S2-23092026.pdf"
-                    target="_blank"
-                    rel="noopener"
-                    class="btn btn-primary">
-
-                    <i class="fa-solid fa-file-pdf"></i>
-
-                    <span
-                        data-fr="Ouvrir le PDF"
-                        data-en="Open PDF">
-                        Ouvrir le PDF
-                    </span>
-
-                </a>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         SÉANCE 2 — 30/09/2026
-    ====================================================== -->
-
-    <div class="card" style="margin-top:20px;">
-
-        <h3>
-            <i class="fa-solid fa-calendar-days"></i>
-
-            <span
-                data-fr="Présence – Séance 2"
-                data-en="Attendance – Session 2">
-                Présence – Séance 2
-            </span>
-        </h3>
-
-        <p>
-            <strong
-                data-fr="Date : 30/09/2026"
-                data-en="Date: 30/09/2026">
-                Date : 30/09/2026
-            </strong>
-        </p>
-
-        <div class="grid grid-2" style="margin-top:20px;">
-
-            <!-- SECTION 01 -->
-            <div class="resource-card">
-
-                <div class="resource-icon">
-                    <i class="fa-solid fa-users"></i>
-                </div>
-
-                <h3>Section 01</h3>
-
-                <a
-                    href="absence/Présence-S1-30092026.pdf"
-                    target="_blank"
-                    rel="noopener"
-                    class="btn btn-primary">
-
-                    <i class="fa-solid fa-file-pdf"></i>
-
-                    <span
-                        data-fr="Ouvrir le PDF"
-                        data-en="Open PDF">
-                        Ouvrir le PDF
-                    </span>
-
-                </a>
-
-            </div>
-
-
-            <!-- SECTION 02 -->
-            <div class="resource-card">
-
-                <div class="resource-icon">
-                    <i class="fa-solid fa-users"></i>
-                </div>
-
-                <h3>Section 02</h3>
-
-                <a
-                    href="absence/Présence-S2-30092026.pdf"
-                    target="_blank"
-                    rel="noopener"
-                    class="btn btn-primary">
-
-                    <i class="fa-solid fa-file-pdf"></i>
-
-                    <span
-                        data-fr="Ouvrir le PDF"
-                        data-en="Open PDF">
-                        Ouvrir le PDF
-                    </span>
-
-                </a>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         SÉANCE 3 — 07/10/2026
-    ====================================================== -->
-
-    <div class="card" style="margin-top:20px;">
-
-        <h3>
-            <i class="fa-solid fa-calendar-days"></i>
-
-            <span
-                data-fr="Présence – Séance 3"
-                data-en="Attendance – Session 3">
-                Présence – Séance 3
-            </span>
-        </h3>
-
-        <p>
-            <strong
-                data-fr="Date : 07/10/2026"
-                data-en="Date: 07/10/2026">
-                Date : 07/10/2026
-            </strong>
-        </p>
-
-        <div class="grid grid-2" style="margin-top:20px;">
-
-            <div class="resource-card">
-
-                <div class="resource-icon">
-                    <i class="fa-solid fa-users"></i>
-                </div>
-
-                <h3>Section 01</h3>
-
-                <a
-                    href="absence/Présence-S1-07102026.pdf"
-                    target="_blank"
-                    rel="noopener"
-                    class="btn btn-primary">
-
-                    <i class="fa-solid fa-file-pdf"></i>
-                    Ouvrir le PDF
-
-                </a>
-
-            </div>
-
-            <div class="resource-card">
-
-                <div class="resource-icon">
-                    <i class="fa-solid fa-users"></i>
-                </div>
-
-                <h3>Section 02</h3>
-
-                <a
-                    href="absence/Présence-S2-07102026.pdf"
-                    target="_blank"
-                    rel="noopener"
-                    class="btn btn-primary">
-
-                    <i class="fa-solid fa-file-pdf"></i>
-                    Ouvrir le PDF
-
-                </a>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         SÉANCE 4 — 14/10/2026
-    ====================================================== -->
-
-    <div class="card" style="margin-top:20px;">
-
-        <h3>
-            <i class="fa-solid fa-calendar-days"></i>
-
-            <span
-                data-fr="Présence – Séance 4"
-                data-en="Attendance – Session 4">
-                Présence – Séance 4
-            </span>
-        </h3>
-
-        <p>
-            <strong
-                data-fr="Date : 14/10/2026"
-                data-en="Date: 14/10/2026">
-                Date : 14/10/2026
-            </strong>
-        </p>
-
-        <div class="grid grid-2" style="margin-top:20px;">
-
-            <div class="resource-card">
-
-                <div class="resource-icon">
-                    <i class="fa-solid fa-users"></i>
-                </div>
-
-                <h3>Section 01</h3>
-
-                <a
-                    href="absence/Présence-S1-14102026.pdf"
-                    target="_blank"
-                    rel="noopener"
-                    class="btn btn-primary">
-
-                    <i class="fa-solid fa-file-pdf"></i>
-                    Ouvrir le PDF
-
-                </a>
-
-            </div>
-
-            <div class="resource-card">
-
-                <div class="resource-icon">
-                    <i class="fa-solid fa-users"></i>
-                </div>
-
-                <h3>Section 02</h3>
-
-                <a
-                    href="absence/Présence-S2-14102026.pdf"
-                    target="_blank"
-                    rel="noopener"
-                    class="btn btn-primary">
-
-                    <i class="fa-solid fa-file-pdf"></i>
-                    Ouvrir le PDF
-
-                </a>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
 </section>
-
 
 <!-- =========================================================
      NOTES
@@ -2812,7 +2409,7 @@ function applyLanguage(){
 const students = [
 
 /* =========================
-   SECTION 01 / GROUPE 01
+   SECTION 01
 ========================= */
 
 ["2023","39411920","AHMID","Ala Mohammed Said","01"],
@@ -2831,6 +2428,7 @@ const students = [
 ["2023","34048304","BOUGHANEM","Anouar","01"],
 ["2023","32151207","CHERIBI","Maria Lina","01"],
 ["2023","34151803","DAGHBOUCHE","Zied","01"],
+["2023","38159313","DAHMANI","Mimouna Mouna","01"],
 ["2023","31568209","DJABALI","Abderraouf","01"],
 ["2023","32024905","ELKHERARBA","Nor El Houda","01"],
 ["2023","34471615","ELOUAERE","Mazin","01"],
@@ -2846,15 +2444,14 @@ const students = [
 ["2023","33067417","MESSIOUNI","Abdeslam","01"],
 ["2022","34486609","OUARET","Mouaadh","01"],
 ["2021","33052865","ROUABAH","Tarek","01"],
+["2023","35548310","SALEM","Abderrahmane","01"],
 ["2023","35629701","SAOUDI","Ramzi","01"],
 ["2023","38004019","SEBAI","Ibrahim","01"],
-["2023","32580608","TAS","Cherif","01"],
 ["2023","33055908","YOUCEF KHOUDJA","Zouina","01"],
 ["2023","37642302","ZANOUNE","Abd Elhadi","01"],
 
-
 /* =========================
-   SECTION 02 / GROUPE 02
+   SECTION 02
 ========================= */
 
 ["2022","33151616","ACHIT","Soundous","02"],
@@ -2872,7 +2469,6 @@ const students = [
 ["2023","31527603","CHAMBI","Zakaria","02"],
 ["2022","32107213","CHEBATA","Imane","02"],
 ["2023","31673206","CHEBIRA","Meriem","02"],
-["2023","38159313","DAHMANI","Mimouna Mouna","02"],
 ["2022","31568320","DJAOUADI","Hind","02"],
 ["2023","31734413","DJENANE","Bilal","02"],
 ["2023","32164103","DJERADI","Aboubaker","02"],
@@ -2891,12 +2487,12 @@ const students = [
 ["2023","33374912","MEGARI","Nihel Kaouter","02"],
 ["2023","32497618","NEMROUD","Faiz","02"],
 ["2022","31320814","OUAIL","Chourouk","02"],
-["2023","34151811","OUNISSI","Mohamed Amine","01"],
+["2023","34151811","OUNISSI","Mohamed Amine","02"],
 ["2023","32276802","REZAK","Ryma","02"],
 ["2023","32396603","SAAD EDINE","Yasser","02"],
-["2023","35548310","SALEM","Abderrahmane","01"],
 ["2023","31518015","SAMAH","Mohamed El Mahdi","02"],
 ["2023","32495519","TAIBI","Mohamed Islam","02"],
+["2023","32580608","TAS","Cherif","02"],
 ["2022","33150216","TELDJOUNE","Yanes","02"],
 ["2023","32215220","TOUMACHE","Sid Ahmed","02"],
 ["2023","32300108","TURKMAN","Mohamed Belkacem","02"],
@@ -2904,7 +2500,6 @@ const students = [
 ["2022","33150517","ZEMARI","Manel","02"]
 
 ];
-
 
 /* =========================================================
    CHAPTER DATA
@@ -4568,40 +4163,9 @@ function syncGroupWithSection(){
    OUNISSI Mohamed Amine and SALEM Abderrahmane belong to Section 01.
 */
 function getPresenceStudents(){
-
     const section = document.getElementById("presenceSection").value;
-
-    const section01Ids = new Set([
-        "39411920","31472814","33037209","36265017","35469213",
-        "31426802","31405410","32359503","32490908","32385219",
-        "35402106","35025308","33284706","34048304","32151207",
-        "34151803","31568209","32024905","34471615","34543106",
-        "38004518","32031804","34151807","34469616","32108108",
-        "34021617","31425018","35410008","33067417","34486609",
-        "33052865","35629701","38004019","32580608","33055908",
-        "37642302","34151811","35548310"
-    ]);
-
-    const section02Ids = new Set([
-        "33151616","32214209","31531414","31518818","32285314",
-        "35191812","32213609","33289613","32497702","31347601",
-        "31031517","31573012","31527603","32107213","31673206",
-        "38159313","31568320","31734413","32164103","31729113",
-        "31729113","31734413","31729113","31734413"
-    ]);
-
-    /* Section 02 is taken directly from the students list, excluding
-       the two students that were incorrectly assigned to Section 02. */
-    const corrected = students.map(student => {
-        if(student[1] === "34151811" || student[1] === "35548310"){
-            return [student[0],student[1],student[2],student[3],"01"];
-        }
-        return student;
-    });
-
-    return corrected.filter(student => student[4] === section);
+    return students.filter(student => student[4] === section);
 }
-
 
 function getCurrentStudents(){
     const search = (document.getElementById("studentSearch")?.value || "")
@@ -4618,8 +4182,18 @@ function getCurrentStudents(){
 function getPresence(id,date){
 
     const section = document.getElementById("presenceSection").value;
-    const session = ATTENDANCE_RECORDS[date];
 
+    /* Modification manuelle (localStorage) prioritaire */
+    const ov = getAttendanceOverrides();
+    if(
+        ov[date] &&
+        ov[date][section] &&
+        ov[date][section][id]
+    ){
+        return ov[date][section][id];
+    }
+
+    const session = ATTENDANCE_RECORDS[date];
     if(!session || !session[section]) return "not-recorded";
 
     const record = session[section];
@@ -4638,13 +4212,23 @@ function getJustification(id,date){
     return (session[section].justified || {})[id] || "";
 }
 
-
 function totalAbsences(id){
     let count = 0;
+    const ov = getAttendanceOverrides();
+    const dates = new Set([
+        ...Object.keys(ATTENDANCE_RECORDS),
+        ...Object.keys(ov)
+    ]);
 
-    Object.keys(ATTENDANCE_RECORDS).forEach(date => {
+    dates.forEach(date => {
         ["01","02"].forEach(section => {
-            const record = ATTENDANCE_RECORDS[date][section];
+
+            if(ov[date] && ov[date][section] && ov[date][section][id]){
+                if(ov[date][section][id] === "absent") count++;
+                return;
+            }
+
+            const record = ATTENDANCE_RECORDS[date] && ATTENDANCE_RECORDS[date][section];
             if(!record) return;
             if(record.absent.includes(id) && !(record.justified && record.justified[id])){
                 count++;
@@ -4654,8 +4238,84 @@ function totalAbsences(id){
 
     return count;
 }
+/* =========================================================
+   PRÉSENCE — Modifications manuelles (localStorage)
+========================================================= */
+
+function getAttendanceOverrides(){
+    return JSON.parse(
+        localStorage.getItem("attendanceOverrides") || "{}"
+    );
+}
 
 
+function setAttendanceOverride(date,section,id,status){
+
+    const ov = getAttendanceOverrides();
+
+    if(!ov[date]) ov[date] = {};
+    if(!ov[date][section]) ov[date][section] = {};
+
+    ov[date][section][id] = status;
+
+    localStorage.setItem(
+        "attendanceOverrides",
+        JSON.stringify(ov)
+    );
+}
+
+
+/*
+   Clique sur le badge :
+   🟢 présent → 🔴 absent → 🟡 justifié → 🟢 présent
+*/
+function togglePresence(id){
+
+    const date = document.getElementById("presenceDate").value;
+    const section = document.getElementById("presenceSection").value;
+
+    const current = getPresence(id,date);
+
+    let next = "present";
+    if(current === "present") next = "absent";
+    else if(current === "absent") next = "justified";
+
+    setAttendanceOverride(date,section,id,next);
+
+    updatePresenceList();
+}
+
+
+function hasAnyRecord(date,section){
+    const ov = getAttendanceOverrides();
+    return !!(
+        (ATTENDANCE_RECORDS[date] && ATTENDANCE_RECORDS[date][section]) ||
+        (ov[date] && ov[date][section])
+    );
+}
+
+
+function computePresenceStats(list,date,section){
+
+    let present = 0;
+    let absent = 0;
+    let justified = 0;
+
+    list.forEach(student => {
+        const status = getPresence(student[1],date);
+        if(status === "present") present++;
+        else if(status === "absent") absent++;
+        else if(status === "justified") justified++;
+    });
+
+    const recorded = hasAnyRecord(date,section);
+    const rate =
+        recorded && list.length
+        ? ((present + justified) / list.length * 100).toFixed(1)
+        : null;
+
+    return { present, absent, justified, recorded, rate };
+}
 function getStudentAbsenceDates(id){
     const dates = [];
     const section = document.getElementById("presenceSection").value;
@@ -4712,8 +4372,7 @@ function updatePresenceList(){
     document.getElementById("currentSectionTitle").textContent =
         `Section ${section} — Groupe ${group} — ${formatDate(date)}`;
 
-    const recordExists = !!(ATTENDANCE_RECORDS[date] && ATTENDANCE_RECORDS[date][section]);
-
+const recordExists = hasAnyRecord(date,section);
     document.getElementById("presenceSessionInfo").innerHTML = `
         <strong>Date :</strong> ${formatDate(date)}
         &nbsp; | &nbsp;
@@ -4755,33 +4414,38 @@ function updatePresenceList(){
 
         let statusHTML = "";
 
-        if(status === "present"){
-            statusHTML = `
-                <span class="btn btn-success" style="display:inline-block;cursor:default;pointer-events:none;">
-                    <i class="fa-solid fa-check"></i> PRÉSENT
-                </span>`;
-        }
-        else if(status === "absent"){
-            statusHTML = `
-                <span class="btn btn-danger" style="display:inline-block;cursor:default;pointer-events:none;">
-                    <i class="fa-solid fa-xmark"></i> ABSENT
-                </span>`;
-        }
-        else if(status === "justified"){
-            statusHTML = `
-                <span class="btn btn-warning" style="display:inline-block;cursor:default;pointer-events:none;">
-                    <i class="fa-solid fa-file-circle-check"></i> ABSENCE JUSTIFIÉE
-                </span>
-                <div style="margin-top:7px;padding:7px 9px;background:#fff7cf;border-left:4px solid #f2c94c;border-radius:6px;font-size:12px;">
-                    <strong>Justification :</strong> ${justification}
-                </div>`;
-        }
-        else{
-            statusHTML = `
-                <span style="display:inline-block;padding:8px 12px;border-radius:8px;background:#eeeeee;color:#666;font-weight:700;">
-                    <i class="fa-solid fa-clock"></i> NON SAISIE
-                </span>`;
-        }
+if(status === "present"){
+    statusHTML = `
+        <button class="btn btn-success"
+        onclick="togglePresence('${student[1]}')"
+        title="Cliquer pour changer">
+        🟢 PRÉSENT
+        </button>`;
+}
+else if(status === "absent"){
+    statusHTML = `
+        <button class="btn btn-danger"
+        onclick="togglePresence('${student[1]}')"
+        title="Cliquer pour changer">
+        🔴 ABSENT
+        </button>`;
+}
+else if(status === "justified"){
+    statusHTML = `
+        <button class="btn btn-warning"
+        onclick="togglePresence('${student[1]}')"
+        title="Cliquer pour changer">
+        🟡 JUSTIFIÉ
+        </button>`;
+}
+else{
+    statusHTML = `
+        <button class="btn btn-light"
+        onclick="togglePresence('${student[1]}')"
+        title="Cliquer pour marquer">
+        ⚪ NON SAISIE
+        </button>`;
+}
 
         body.innerHTML += `
             <tr>
@@ -4812,7 +4476,7 @@ function updatePresenceStats(){
     const date = document.getElementById("presenceDate").value;
     const list = getCurrentStudents();
     const section = document.getElementById("presenceSection").value;
-    const recordExists = !!(ATTENDANCE_RECORDS[date] && ATTENDANCE_RECORDS[date][section]);
+    const recordExists = hasAnyRecord(date,section);
 
     let present = 0;
     let absent = 0;
@@ -4982,22 +4646,12 @@ function selectStudentFromList(id){
 }
 
 
-function populatePresenceDates(){
-    const select = document.getElementById("presenceDate");
-    if(!select) return;
-
-    select.innerHTML = "";
-
-    getSessionDates().forEach(date => {
-        const option = document.createElement("option");
-        option.value = date;
-        option.textContent = formatDate(date);
-        select.appendChild(option);
-    });
-
-    select.value = ATTENDANCE_START_DATE;
+function initPresenceDate(){
+    const input = document.getElementById("presenceDate");
+    if(input && !input.value){
+        input.value = ATTENDANCE_START_DATE;
+    }
 }
-
 
 function printAttendance(){
     const date = document.getElementById("presenceDate").value;
@@ -5844,8 +5498,7 @@ renderExams();
 renderResources();
 
 
-populatePresenceDates();
-
+initPresenceDate();
 syncGroupWithSection();
 
 updatePresenceList();
@@ -5854,6 +5507,168 @@ updateStudentFollowUp();
 
 });
 
+
+/* =========================================================
+   PRÉSENCE — TÉLÉCHARGEMENT PDF
+========================================================= */
+
+function downloadAttendancePDF(){
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const date = document.getElementById("presenceDate").value;
+    const section = document.getElementById("presenceSection").value;
+    const group = document.getElementById("presenceGroup").value;
+    const list = getPresenceStudents();
+    const stats = computePresenceStats(list,date,section);
+
+    const statusLabel = s =>
+        s === "present" ? "PRÉSENT" :
+        s === "absent" ? "ABSENT" :
+        s === "justified" ? "JUSTIFIÉ" : "NON SAISIE";
+
+    /* ------- EN-TÊTE OFFICIEL ------- */
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(11);
+    doc.text("République Algérienne Démocratique et Populaire",105,12,{align:"center"});
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(9);
+    doc.text("الجمهورية الجزائرية الديمقراطية الشعبية",105,17,{align:"center"});
+
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(11);
+    doc.text("École Nationale Supérieure des Travaux Publics — Kouba, Alger",105,24,{align:"center"});
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(9);
+    doc.text("Higher National School of Public Works — Kouba, Algiers",105,29,{align:"center"});
+
+    doc.setDrawColor(0,102,153);
+    doc.setLineWidth(0.6);
+    doc.line(15,33,195,33);
+
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(13);
+    doc.text("FICHE DE PRÉSENCE — MÉCANIQUE DES STRUCTURES",105,41,{align:"center"});
+
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(10);
+    doc.text(
+        `Date : ${formatDate(date)}    |    Section : ${section}    |    Groupe : ${group}    |    Effectif : ${list.length}`,
+        105,49,{align:"center"}
+    );
+    doc.text("Enseignant : Dr. Assas Taqiyeddine    |    Année universitaire : 2026 / 2027",105,55,{align:"center"});
+
+    /* ------- TABLEAU ------- */
+    const rows = list.map((student,index) => [
+        index+1,
+        student[1],
+        student[2],
+        student[3],
+        student[0],
+        statusLabel(getPresence(student[1],date)),
+        totalAbsences(student[1])
+    ]);
+
+    doc.autoTable({
+        startY: 62,
+        head: [["#","Matricule","Nom","Prénom","Année Bac","Présence","Abs. annuelles"]],
+        body: rows,
+        styles:{ fontSize:8.5, cellPadding:1.8 },
+        headStyles:{ fillColor:[0,102,153], textColor:255 },
+        alternateRowStyles:{ fillColor:[244,247,250] },
+        didParseCell: function(data){
+            if(data.section === "body" && data.column.index === 5){
+                const v = data.cell.raw;
+                if(v === "PRÉSENT") data.cell.styles.textColor = [22,128,60];
+                else if(v === "ABSENT") data.cell.styles.textColor = [198,40,40];
+                else if(v === "JUSTIFIÉ") data.cell.styles.textColor = [180,140,0];
+            }
+        }
+    });
+
+    /* ------- STATISTIQUES ------- */
+    const y = doc.lastAutoTable.finalY + 10;
+
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(11);
+    doc.text("Statistiques de la séance",15,y);
+
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(10);
+    doc.text(`Présents : ${stats.present}`,15,y+7);
+    doc.text(`Absents : ${stats.absent}`,70,y+7);
+    doc.text(`Absences justifiées : ${stats.justified}`,120,y+7);
+    doc.text(`Taux de présence : ${stats.rate !== null ? stats.rate + " %" : "—"}`,15,y+14);
+
+    doc.setFontSize(8);
+    doc.setTextColor(120);
+    doc.text("Document généré par la plateforme pédagogique — ENSTP Kouba",105,290,{align:"center"});
+
+    doc.save(`Presence_Section-${section}_${date}.pdf`);
+}
+
+
+/* =========================================================
+   PRÉSENCE — TÉLÉCHARGEMENT EXCEL
+========================================================= */
+
+function downloadAttendanceExcel(){
+
+    const date = document.getElementById("presenceDate").value;
+    const section = document.getElementById("presenceSection").value;
+    const group = document.getElementById("presenceGroup").value;
+    const list = getPresenceStudents();
+    const stats = computePresenceStats(list,date,section);
+
+    const statusLabel = s =>
+        s === "present" ? "PRÉSENT" :
+        s === "absent" ? "ABSENT" :
+        s === "justified" ? "JUSTIFIÉ" : "NON SAISIE";
+
+    const data = [
+
+        ["République Algérienne Démocratique et Populaire"],
+        ["École Nationale Supérieure des Travaux Publics — Kouba, Alger"],
+        ["Higher National School of Public Works"],
+        ["Module : Mécanique des Structures — Année universitaire 2026 / 2027"],
+        ["Enseignant : Dr. Assas Taqiyeddine"],
+        [],
+        ["Date", formatDate(date), "Section", section, "Groupe", group, "Effectif", list.length],
+        [],
+        ["#","Année Bac","Matricule","Nom","Prénom","Section","Présence","Absences annuelles"],
+
+        ...list.map((student,index) => [
+            index+1,
+            student[0],
+            student[1],
+            student[2],
+            student[3],
+            "Section " + section,
+            statusLabel(getPresence(student[1],date)),
+            totalAbsences(student[1])
+        ]),
+
+        [],
+        ["STATISTIQUES"],
+        ["Présents", stats.present],
+        ["Absents", stats.absent],
+        ["Absences justifiées", stats.justified],
+        ["Taux de présence (%)", stats.rate !== null ? Number(stats.rate) : "—"]
+
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(data);
+
+    ws["!cols"] = [
+        {wch:6},{wch:10},{wch:12},{wch:22},{wch:26},{wch:12},{wch:16},{wch:18}
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Présence " + date);
+
+    XLSX.writeFile(wb, `Presence_Section-${section}_${date}.xlsx`);
+}
 </script>
 
 
