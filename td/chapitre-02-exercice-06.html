@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akashi Kaikyo Bridge - Interactive 2D/3D Structural Platform</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --panel-bg: #1e293b;
+            --accent: #38bdf8;
+            --accent-green: #4ade80;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg-dark); color: var(--text-main); height: 100vh; overflow: hidden; }
+
+        #app-header {
+            height: 60px;
+            background: var(--panel-bg);
+            border-bottom: 2px solid var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .brand-title { font-size: 1.1rem; font-weight: 700; color: var(--accent); }
+        .lang-switch {
+            background: #0284c7;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .lang-switch:hover { background: #0369a1; }
+
+        #main-container {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+
+        #viewports {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #000;
+        }
+
+        #viewport-3d { flex: 2; position: relative; }
+        #viewport-2d { flex: 1; border-top: 2px solid var(--border); position: relative; background: #0284c70d; }
+
+        #controls-sidebar {
+            width: 380px;
+            background: var(--panel-bg);
+            border-left: 1px solid var(--border);
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .card {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .card-title {
+            color: var(--accent);
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 6px;
+        }
+
+        .control-row { margin-bottom: 12px; }
+        .control-row label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px; }
+        input[type="range"] { width: 100%; accent-color: var(--accent); }
+
+        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .data-item { background: #1e293b66; padding: 8px; border-radius: 4px; border: 1px solid #33415544; }
+        .data-label { font-size: 0.75rem; color: var(--text-muted); }
+        .data-val { font-size: 0.95rem; font-weight: 700; color: var(--accent-green); margin-top: 2px; }
+
+        .canvas-label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #000000aa;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: var(--accent);
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+    <header id="app-header">
+        <div class="brand-title" id="txt-title">Pont d'Akashi - Plateforme Interactive 2D/3D</div>
+        <button class="lang-switch" id="btn-lang" onclick="toggleLang()">English</button>
+    </header>
+
+    <div id="main-container">
+        <div id="viewports">
+            <div id="viewport-3d">
+                <div class="canvas-label" id="lbl-3d">Vue 3D Dynamic Traffic & Structure</div>
+            </div>
+            <div id="viewport-2d">
+                <div class="canvas-label" id="lbl-2d">Profil 2D Deformed Cable Profile</div>
+                <canvas id="cvs2d"></canvas>
+            </div>
+        </div>
+
+        <aside id="controls-sidebar">
+            <div class="card">
+                <div class="card-title" id="txt-sec-input">Paramètres de Simulation</div>
+                <div class="control-row">
+                    <label id="lbl-q">Charge Repartie q' (kN/m) : <span id="val-q">230</span></label>
+                    <input type="range" id="input-q" min="180" max="320" value="230" step="1" oninput="runCalculations()">
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title" id="txt-sec-central">Câble Central (Central Span)</div>
+                <div class="data-grid">
+                    <div class="data-item">
+                        <div class="data-label" id="lbl-h">Poussée H</div>
+                        <div class="data-val" id="out-h">581.5 MN</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label" id="lbl-tmax">Tension T_max</div>
+                        <div class="data-val" id="out-tmax">625.0 MN</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label" id="lbl-theta">Angle θ</div>
+                        <div class="data-val" id="out-theta">21.50°</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label" id="lbl-sigma">Contrainte σ</div>
+                        <div class="data-val" id="out-sigma">633.3 MPa</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title" id="txt-sec-side">Câble de Rive (Side Span)</div>
+                <div class="data-grid">
+                    <div class="data-item">
+                        <div class="data-label" id="lbl-fside">Flèche f'</div>
+                        <div class="data-val" id="out-fside">63.15 m</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label" id="lbl-alpha">Angle α (Pile)</div>
+                        <div class="data-val" id="out-alpha">22.31°</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label" id="lbl-tbeta">Tension T_β</div>
+                        <div class="data-val" id="out-tbeta">490.29 MN</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label" id="lbl-talpha">Tension T_α</div>
+                        <div class="data-val" id="out-talpha">530.04 MN</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        let lang = 'fr';
+        const dict = {
+            fr: {
+                title: "Pont d'Akashi - Plateforme Interactive 2D/3D",
+                btnLang: "English",
+                lbl3d: "Vue 3D - Structure & Trafic Autoroutier",
+                lbl2d: "Profil 2D - Déformation du Câble",
+                secInput: "Paramètres de Simulation",
+                lblQ: "Charge Répartie q' (kN/m) : ",
+                secCentral: "Câble Central",
+                secSide: "Câble de Rive",
+                h: "Poussée H",
+                tmax: "Tension T_max",
+                theta: "Angle θ",
+                sigma: "Contrainte σ",
+                fside: "Flèche f'",
+                alpha: "Angle α (Pile)",
+                tbeta: "Tension T_β",
+                talpha: "Tension T_α"
+            },
+            en: {
+                title: "Akashi Bridge - 2D/3D Structural Simulator",
+                btnLang: "Français",
+                lbl3d: "3D View - Structure & Highway Traffic",
+                lbl2d: "2D View - Cable Deformation Profile",
+                secInput: "Simulation Parameters",
+                lblQ: "Distributed Load q' (kN/m) : ",
+                secCentral: "Central Span Cable",
+                secSide: "Side Span Cable",
+                h: "Thrust H",
+                tmax: "Max Tension T_max",
+                theta: "Angle θ",
+                sigma: "Stress σ",
+                fside: "Side Sag f'",
+                alpha: "Angle α (Tower)",
+                tbeta: "Tension T_β",
+                talpha: "Tension T_α"
+            }
+        };
+
+        function toggleLang() {
+            lang = lang === 'fr' ? 'en' : 'fr';
+            const t = dict[lang];
+            document.getElementById('txt-title').innerText = t.title;
+            document.getElementById('btn-lang').innerText = t.btnLang;
+            document.getElementById('lbl-3d').innerText = t.lbl3d;
+            document.getElementById('lbl-2d').innerText = t.lbl2d;
+            document.getElementById('txt-sec-input').innerText = t.secInput;
+            document.getElementById('txt-sec-central').innerText = t.secCentral;
+            document.getElementById('txt-sec-side').innerText = t.secSide;
+            document.getElementById('lbl-h').innerText = t.h;
+            document.getElementById('lbl-tmax').innerText = t.tmax;
+            document.getElementById('lbl-theta').innerText = t.theta;
+            document.getElementById('lbl-sigma').innerText = t.sigma;
+            document.getElementById('lbl-fside').innerText = t.fside;
+            document.getElementById('lbl-alpha').innerText = t.alpha;
+            document.getElementById('lbl-tbeta').innerText = t.tbeta;
+            document.getElementById('lbl-talpha').innerText = t.talpha;
+            runCalculations();
+        }
+
+        function runCalculations() {
+            const q = parseFloat(document.getElementById('input-q').value);
+            document.getElementById('val-q').innerText = q;
+
+            const L = 1990.8, f = 196, A = 0.986865;
+            const H = (q * L * L) / (8 * f) / 1000; // MN
+            const thetaRad = Math.atan((4 * f) / L);
+            const thetaDeg = thetaRad * (180 / Math.PI);
+            const Tmax = H / Math.cos(thetaRad);
+            const sigma = (Tmax * 1000) / A / 1000;
+
+            const fSide = 63.15;
+            const alphaDeg = 22.31;
+            const Tbeta = 490.29;
+            const Talpha = 530.04;
+
+            document.getElementById('out-h').innerText = H.toFixed(1) + " MN";
+            document.getElementById('out-tmax').innerText = Tmax.toFixed(1) + " MN";
+            document.getElementById('out-theta').innerText = thetaDeg.toFixed(2) + "°";
+            document.getElementById('out-sigma').innerText = sigma.toFixed(1) + " MPa";
+
+            document.getElementById('out-fside').innerText = fSide.toFixed(2) + " m";
+            document.getElementById('out-alpha').innerText = alphaDeg.toFixed(2) + "°";
+            document.getElementById('out-tbeta').innerText = Tbeta.toFixed(2) + " MN";
+            document.getElementById('out-talpha').innerText = Talpha.toFixed(2) + " MN";
+
+            draw2D(q);
+        }
+
+        // 2D Canvas Engine
+        const cvs = document.getElementById('cvs2d');
+        const ctx = cvs.getContext('2d');
+
+        function draw2D(q) {
+            cvs.width = cvs.clientWidth;
+            cvs.height = cvs.clientHeight;
+            const w = cvs.width, h = cvs.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Water line
+            ctx.fillStyle = '#0284c733';
+            ctx.fillRect(0, h - 25, w, 25);
+
+            // Deck line
+            const deckY = h - 45;
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(20, deckY);
+            ctx.lineTo(w - 20, deckY);
+            ctx.stroke();
+
+            // Pylons
+            const p1X = w * 0.28, p2X = w * 0.72;
+            const pylonTopY = 25;
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(p1X, h - 25); ctx.lineTo(p1X, pylonTopY);
+            ctx.moveTo(p2X, h - 25); ctx.lineTo(p2X, pylonTopY);
+            ctx.stroke();
+
+            // Dynamic Cable Sag
+            const sagFactor = (q / 230) * 45;
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 2.5;
+
+            // Side span left
+            ctx.beginPath();
+            ctx.moveTo(20, deckY);
+            ctx.quadraticCurveTo((20 + p1X)/2, pylonTopY + 30, p1X, pylonTopY);
+            // Main span
+            ctx.quadraticCurveTo((p1X + p2X)/2, pylonTopY + sagFactor, p2X, pylonTopY);
+            // Side span right
+            ctx.quadraticCurveTo((p2X + w - 20)/2, pylonTopY + 30, w - 20, deckY);
+            ctx.stroke();
+        }
+
+        // Three.js 3D Engine
+        let scene, camera, renderer, trafficVehicles = [];
+
+        function init3D() {
+            const container = document.getElementById('viewport-3d');
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0f172a);
+
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 1, 3000);
+            camera.position.set(0, 220, 650);
+            camera.lookAt(0, 0, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            dirLight.position.set(150, 300, 200);
+            scene.add(dirLight);
+            scene.add(new THREE.AmbientLight(0x38bdf8, 0.4));
+
+            // Structural Assembly
+            const deckMat = new THREE.MeshLambertMaterial({ color: 0x334155 });
+            const deck = new THREE.Mesh(new THREE.BoxGeometry(900, 8, 40), deckMat);
+            scene.add(deck);
+
+            const towerMat = new THREE.MeshLambertMaterial({ color: 0x64748b });
+            const t1 = new THREE.Mesh(new THREE.BoxGeometry(16, 200, 16), towerMat);
+            t1.position.set(-220, 96, 0);
+            const t2 = t1.clone();
+            t2.position.set(220, 96, 0);
+            scene.add(t1); scene.add(t2);
+
+            // Traffic Vehicles Simulation
+            const carMat = new THREE.MeshLambertMaterial({ color: 0xef4444 });
+            for(let i = 0; i < 20; i++) {
+                const vehicle = new THREE.Mesh(new THREE.BoxGeometry(8, 4, 4), carMat);
+                vehicle.position.set(-420 + Math.random() * 840, 6, -12 + Math.random() * 24);
+                scene.add(vehicle);
+                trafficVehicles.push(vehicle);
+            }
+
+            function animate() {
+                requestAnimationFrame(animate);
+                trafficVehicles.forEach(v => {
+                    v.position.x += 1.8;
+                    if(v.position.x > 420) v.position.x = -420;
+                });
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+
+        window.onload = () => {
+            init3D();
+            runCalculations();
+        };
+
+        window.onresize = () => {
+            const container = document.getElementById('viewport-3d');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            runCalculations();
+        };
+    </script>
+</body>
+</html>

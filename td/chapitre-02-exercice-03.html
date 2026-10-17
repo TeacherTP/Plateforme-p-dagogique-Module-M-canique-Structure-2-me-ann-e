@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Chaîne suspendue - Démonstrations et Solution Détaillée</title>
+
+<!-- =========================================================
+     MATHJAX
+========================================================= -->
+
+<script>
+window.MathJax = {
+    tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+    },
+    svg: {
+        fontCache: 'global'
+    }
+};
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<!-- =========================================================
+     THREE.JS
+========================================================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+
+<style>
+
+/* =========================================================
+   VARIABLES
+========================================================= */
+
+:root{
+    --blue:#0b5ea8;
+    --blue-dark:#073b6b;
+    --blue-light:#eaf4ff;
+
+    --gold:#f2b632;
+    --green:#198754;
+    --red:#d63b3b;
+
+    --dark:#142235;
+    --gray:#64748b;
+    --light:#f4f7fb;
+
+    --white:#ffffff;
+
+    --border:#dbe4ef;
+
+    --shadow:
+        0 10px 35px rgba(10,40,70,.10);
+}
+
+
+/* =========================================================
+   GLOBAL
+========================================================= */
+
+*{
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    margin:0;
+    font-family:
+    "Segoe UI",
+    Arial,
+    sans-serif;
+    background:var(--light);
+    color:var(--dark);
+    line-height:1.7;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+header{
+    background:
+    linear-gradient(
+        135deg,
+        #06294b,
+        #0b5ea8,
+        #1685d4
+    );
+    color:white;
+    padding:45px 6%;
+    position:relative;
+    overflow:hidden;
+}
+
+header::after{
+    content:"";
+    position:absolute;
+    width:400px;
+    height:400px;
+    border-radius:50%;
+    border:70px solid rgba(255,255,255,.05);
+    right:-120px;
+    top:-180px;
+}
+
+.header-content{
+    max-width:1250px;
+    margin:auto;
+    position:relative;
+    z-index:2;
+}
+
+.tag{
+    display:inline-block;
+    background:
+    rgba(255,255,255,.15);
+    border:
+    1px solid rgba(255,255,255,.3);
+    padding:
+    7px 14px;
+    border-radius:30px;
+    font-size:13px;
+    font-weight:bold;
+    letter-spacing:.5px;
+}
+
+header h1{
+    font-size:
+    clamp(28px,5vw,48px);
+    margin:
+    15px 0 10px;
+    line-height:1.15;
+}
+
+header p{
+    font-size:18px;
+    opacity:.92;
+    max-width:850px;
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+nav{
+    position:sticky;
+    top:0;
+    z-index:1000;
+    background:white;
+    border-bottom:
+    1px solid var(--border);
+    box-shadow:
+    0 3px 15px rgba(0,0,0,.05);
+    overflow-x:auto;
+}
+
+.nav-inner{
+    max-width:1250px;
+    margin:auto;
+    display:flex;
+    gap:5px;
+    padding:8px;
+}
+
+nav a{
+    text-decoration:none;
+    color:var(--blue-dark);
+    font-weight:700;
+    white-space:nowrap;
+    padding:
+    9px 14px;
+    border-radius:9px;
+    transition:.2s;
+}
+
+nav a:hover{
+    background:
+    var(--blue-light);
+    color:var(--blue);
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+main{
+    max-width:1250px;
+    margin:auto;
+    padding:
+    25px 4%;
+}
+
+.card{
+    background:white;
+    border:
+    1px solid var(--border);
+    border-radius:20px;
+    padding:30px;
+    margin-bottom:25px;
+    box-shadow:var(--shadow);
+}
+
+.card h2{
+    margin-top:0;
+    color:var(--blue-dark);
+    font-size:29px;
+    border-bottom:
+    2px solid var(--blue-light);
+    padding-bottom:12px;
+}
+
+.card h3{
+    color:var(--blue);
+    margin-top:28px;
+}
+
+
+/* =========================================================
+   DATA CARDS
+========================================================= */
+
+.grid{
+    display:grid;
+    grid-template-columns:
+    repeat(
+        auto-fit,
+        minmax(220px,1fr)
+    );
+    gap:15px;
+    margin:
+    20px 0;
+}
+
+.data{
+    background:
+    #fbfdff;
+    border:
+    1px solid var(--border);
+    border-radius:14px;
+    padding:18px;
+    transition:.2s;
+}
+
+.data:hover{
+    transform:
+    translateY(-3px);
+    box-shadow:
+    0 8px 25px rgba(10,50,90,.08);
+}
+
+.data-title{
+    color:var(--gray);
+    font-size:14px;
+    font-weight:bold;
+}
+
+.data-value{
+    color:var(--blue-dark);
+    font-size:23px;
+    font-weight:800;
+}
+
+
+/* =========================================================
+   PROBLEM
+========================================================= */
+
+.problem-box{
+    background:
+    linear-gradient(
+        135deg,
+        #f8fbff,
+        #eef7ff
+    );
+    border-left:
+    6px solid var(--blue);
+    padding:25px;
+    border-radius:12px;
+    font-size:19px;
+}
+
+
+/* =========================================================
+   FIGURE DU PROBLEME
+========================================================= */
+
+.problem-photo{
+    display:block;
+    width:100%;
+    max-width:1000px;
+    height:auto;
+    margin:25px auto;
+    border-radius:12px;
+    box-shadow:
+    0 8px 30px rgba(0,0,0,.15);
+}
+
+
+/* =========================================================
+   ALERT
+========================================================= */
+
+.alert{
+    padding:18px;
+    border-radius:12px;
+    margin:20px 0;
+}
+
+.alert-info{
+    background:#eef7ff;
+    border-left:5px solid var(--blue);
+}
+
+.alert-warning{
+    background:#fff8df;
+    border-left:5px solid var(--gold);
+}
+
+.alert-success{
+    background:#eaf8f1;
+    border-left:5px solid var(--green);
+}
+
+.alert-danger{
+    background:#fff0f0;
+    border-left:5px solid var(--red);
+}
+
+
+/* =========================================================
+   STEPS
+========================================================= */
+
+.step{
+    border-left:
+    4px solid #8db7d9;
+    background:#fbfdff;
+    padding:
+    18px 22px;
+    margin:
+    15px 0;
+    border-radius:
+    0 14px 14px 0;
+}
+
+.step-number{
+    display:inline-flex;
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    background:
+    var(--blue);
+    color:white;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    margin-right:8px;
+}
+
+
+/* =========================================================
+   EQUATIONS
+========================================================= */
+
+.equation{
+    background:
+    #f7faff;
+    border:
+    1px solid #dceafa;
+    border-radius:12px;
+    padding:
+    15px;
+    margin:
+    12px 0;
+    overflow-x:auto;
+    text-align:center;
+    font-size:20px;
+}
+
+
+/* =========================================================
+   CANVAS
+========================================================= */
+
+.canvas-wrapper{
+    position:relative;
+    width:100%;
+    overflow:hidden;
+    border:
+    1px solid var(--border);
+    border-radius:16px;
+    background:white;
+}
+
+canvas{
+    width:100%;
+    height:auto;
+    display:block;
+}
+
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.buttons{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:15px 0;
+}
+
+button{
+    border:0;
+    border-radius:10px;
+    padding:
+    11px 17px;
+    background:
+    var(--blue);
+    color:white;
+    font-weight:700;
+    cursor:pointer;
+    transition:.2s;
+}
+
+button:hover{
+    transform:
+    translateY(-2px);
+    box-shadow:
+    0 6px 15px rgba(0,70,130,.2);
+}
+
+button.secondary{
+    background:
+    #e9eef4;
+    color:
+    var(--dark);
+}
+
+button.green{
+    background:
+    var(--green);
+}
+
+
+/* =========================================================
+   RANGE
+========================================================= */
+
+input[type=range]{
+    width:100%;
+    accent-color:
+    var(--blue);
+    cursor:pointer;
+}
+
+
+/* =========================================================
+   FORCE LEGEND
+========================================================= */
+
+.force-grid{
+    display:grid;
+    grid-template-columns:
+    repeat(
+        auto-fit,
+        minmax(170px,1fr)
+    );
+    gap:12px;
+}
+
+.force{
+    padding:15px;
+    border-radius:12px;
+    background:#f9fbfd;
+    border:1px solid var(--border);
+    text-align:center;
+}
+
+.force strong{
+    display:block;
+    font-size:22px;
+    color:var(--blue-dark);
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin:20px 0;
+}
+
+th,td{
+    padding:13px;
+    border-bottom:
+    1px solid var(--border);
+    text-align:left;
+}
+
+th{
+    background:
+    #edf5fc;
+    color:
+    var(--blue-dark);
+}
+
+
+/* =========================================================
+   3D
+========================================================= */
+
+#scene3D{
+    width:100%;
+    height:560px;
+    border-radius:16px;
+    overflow:hidden;
+    background:
+    #eaf0f5;
+    border:
+    1px solid var(--border);
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+footer{
+    text-align:center;
+    padding:35px;
+    color:
+    var(--gray);
+    background:white;
+    border-top:
+    1px solid var(--border);
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:700px){
+    .card{
+        padding:20px;
+    }
+
+    header{
+        padding:35px 5%;
+    }
+
+    .problem-box{
+        font-size:17px;
+    }
+
+    #scene3D{
+        height:400px;
+    }
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =======================================================
+HEADER
+======================================================= -->
+
+<header>
+
+<div class="header-content">
+
+<span class="tag">
+MÉCANIQUE DES CÂBLES • CHAIN / CATENARY
+</span>
+
+<h1 id="title">
+Démonstration Complète et Solution Détaillée d'une Chaîne Suspendue
+</h1>
+
+<p id="subtitle">
+Démonstration rigoureuse de chaque relation mathématique (Chaînette et Parabole)
+suivie de la résolution numérique pas à pas du problème.
+</p>
+
+</div>
+
+</header>
+
+
+<!-- =======================================================
+NAVIGATION
+======================================================= -->
+
+<nav>
+
+<div class="nav-inner">
+
+<a href="#problem">① Problème</a>
+<a href="#physics">② Comprendre</a>
+<a href="#demonstrations">③ Démonstrations</a>
+<a href="#animation2d">④ Animation 2D</a>
+<a href="#animation3d">⑤ Modèle 3D</a>
+<a href="#work">⑥ Travail guidé</a>
+<a href="#solution">⑦ Solution pas à pas</a>
+
+</div>
+
+</nav>
+
+
+<main>
+
+
+<!-- =======================================================
+1 PROBLEME
+======================================================= -->
+
+<section id="problem" class="card">
+
+<h2>
+① Énoncé du problème
+</h2>
+
+<div class="problem-box">
+
+<strong>Problème :</strong>
+
+<p id="problemText">
+Trouver la flèche <strong>f</strong> à mi-travée d’une chaîne de longueur égale à <strong>30 m</strong>,
+de poids linéique <strong>25 kN/m</strong>, articulée à ses extrémités distantes de
+<strong>15 m</strong> et situées au même niveau.
+</p>
+
+</div>
+<h3>📷 Figure du problème</h3>
+
+<img
+    src="schema-probleme.png"
+    class="problem-photo"
+    alt="Figure du problème de la chaîne suspendue">
+
+<div class="grid">
+
+<div class="data">
+<div class="data-title">Longueur de la chaîne ($S$)</div>
+<div class="data-value">30 m</div>
+</div>
+
+<div class="data">
+<div class="data-title">Portée horizontale ($L$)</div>
+<div class="data-value">15 m</div>
+</div>
+
+<div class="data">
+<div class="data-title">Poids linéique ($q$)</div>
+<div class="data-value">25 kN/m</div>
+</div>
+
+<div class="data">
+<div class="data-title">Position des appuis</div>
+<div class="data-value">Même niveau</div>
+</div>
+
+</div>
+
+</section>
+
+
+
+<!-- =======================================================
+2 PHYSIQUE
+======================================================= -->
+
+<section id="physics" class="card">
+
+<h2>
+② Comprendre le phénomène physique
+</h2>
+
+<h3>Pourquoi la chaîne devient-elle une chaînette ?</h3>
+
+<p>
+La chaîne est flexible et ne résiste pas aux moments de flexion. Elle travaille exclusivement en <strong>traction</strong>.
+Sous l'effet de son propre poids distribué uniformément le long de sa longueur réelle, la forme d'équilibre statique exacte prise par la chaîne est une <strong>chaînette (catenary)</strong>.
+</p>
+
+<div class="alert alert-info">
+<strong>Remarque sur la symétrie :</strong>
+<p>
+Les deux appuis $A$ et $B$ sont au même niveau horizontal. Par symétrie, le point le plus bas $O(0,0)$ de la chaîne se situe exactement à mi-portée ($x = 0$), où la pente est strictement nulle ($\frac{dy}{dx} = 0$).
+</p>
+</div>
+
+</section>
+
+
+
+<!-- =======================================================
+3 DEMONSTRATIONS DE CHAQUE RELATION
+======================================================= -->
+
+<section id="demonstrations" class="card">
+
+<h2>
+③ Démonstration mathématique de chaque relation
+</h2>
+
+<h3>A. Équations exactes de la Chaînette</h3>
+
+<div class="step">
+<span class="step-number">1</span>
+<strong>Équilibre statique d'un élément infinitésimal</strong>
+<p>
+Soit un tronçon de câble $OM$ de longueur $s$, reliant le point bas $O(0,0)$ au point $M(x,y)$.
+Les forces appliquées sont la tension horizontale $H$ en $O$, la tension $T(x)$ inclinée d'un angle $\theta$ en $M$, et le poids du tronçon $W = q \cdot s$.
+</p>
+<div class="equation">
+$$T \cos\theta = H \quad \text{et} \quad T \sin\theta = q \cdot s$$
+</div>
+<p>En effectuant le rapport des deux équations :</p>
+<div class="equation">
+$$\tan\theta = \frac{dy}{dx} = \frac{q \cdot s}{H} = \frac{s}{a} \quad \text{avec le paramètre } a = \frac{H}{q}$$
+</div>
+</div>
+
+
+<div class="step">
+<span class="step-number">2</span>
+<strong>Équation différentielle de la courbe</strong>
+<p>En dérivant par rapport à $x$ et en utilisant la relation géométrique $ds = \sqrt{dx^2 + dy^2}$ :</p>
+<div class="equation">
+$$\frac{d^2 y}{dx^2} = \frac{1}{a} \frac{ds}{dx} = \frac{1}{a} \sqrt{1 + \left(\frac{dy}{dx}\right)^2}$$
+</div>
+<p>En posant $y' = \frac{dy}{dx}$, on sépare les variables :</p>
+<div class="equation">
+$$\frac{dy'}{\sqrt{1 + (y')^2}} = \frac{dx}{a}$$
+</div>
+</div>
+
+
+<div class="step">
+<span class="step-number">3</span>
+<strong>Démonstration de la longueur d'arc $s(x)$ et de la pente $y'(x)$</strong>
+<p>En intégrant avec la condition initiale $y'(0) = 0$ :</p>
+<div class="equation">
+$$\operatorname{arcsinh}(y') = \frac{x}{a} \implies y'(x) = \frac{dy}{dx} = \sinh\left(\frac{x}{a}\right)$$
+</div>
+<p>Puisque $\frac{dy}{dx} = \frac{s}{a}$, on en déduit directement l'équation de la demi-longueur d'arc :</p>
+<div class="equation">
+$$\boxed{s(x) = a \sinh\left(\frac{x}{a}\right)}$$
+</div>
+<p>Pour l'appui situé à la demi-portée $x = \frac{L}{2}$, la demi-longueur est $s_0 = \frac{S}{2}$ :</p>
+<div class="equation">
+$$s_0 = a \sinh\left(\frac{L}{2a}\right)$$
+</div>
+</div>
+
+
+<div class="step">
+<span class="step-number">4</span>
+<strong>Démonstration du profil $y(x)$ et de la flèche $f$</strong>
+<p>En intégrant $y'(x) = \sinh\left(\frac{x}{a}\right)$ avec la condition $y(0) = 0$ :</p>
+<div class="equation">
+$$y(x) = \int_0^x \sinh\left(\frac{t}{a}\right) dt = \boxed{a \left[\cosh\left(\frac{x}{a}\right) - 1\right]}$$
+</div>
+<p>La flèche $f$ est la hauteur au niveau de la demi-portée $x = \frac{L}{2}$ :</p>
+<div class="equation">
+$$\boxed{f = a \left[\cosh\left(\frac{L}{2a}\right) - 1\right]}$$
+</div>
+</div>
+
+
+<div class="step">
+<span class="step-number">5</span>
+<strong>Démonstration de la tension $T(x)$</strong>
+<p>Par le théorème de Pythagore sur le triangle des forces :</p>
+<div class="equation">
+$$T(x) = \sqrt{H^2 + (q \cdot s)^2} = \sqrt{(q \cdot a)^2 + \left(q \cdot a \sinh\left(\frac{x}{a}\right)\right)^2} = q \cdot a \cosh\left(\frac{x}{a}\right)$$
+</div>
+<div class="equation">
+$$\boxed{T(x) = H + q \cdot y(x)}$$
+</div>
+</div>
+
+<hr>
+
+<h3>B. Démonstration des formules de l'Approximation Parabolique</h3>
+
+<div class="step">
+<span class="step-number">1</span>
+<strong>Équation de la parabole et Tension $H$</strong>
+<p>Pour une faible flèche, la charge est considérée comme uniforme le long de l'axe horizontal $x$.</p>
+<div class="equation">
+$$y(x) = \frac{4f}{L^2} x^2$$
+</div>
+<p>L'équilibre des moments au centre de la travée donne :</p>
+<div class="equation">
+$$H \cdot f = \frac{q L^2}{8} \implies \boxed{H = \frac{q L^2}{8f}}$$
+</div>
+</div>
+
+
+<div class="step">
+<span class="step-number">2</span>
+<strong>Démonstration de la longueur $S$ par développement limité</strong>
+<p>L'intégrale de longueur d'arc de la parabole est :</p>
+<div class="equation">
+$$S = 2 \int_0^{L/2} \sqrt{1 + \left(\frac{8f}{L^2}x\right)^2} dx$$
+</div>
+<p>Utilisons le développement limité $(1 + u)^{1/2} \approx 1 + \frac{1}{2}u$ avec $u = \frac{64 f^2}{L^4} x^2$ :</p>
+<div class="equation">
+$$S \approx 2 \int_0^{L/2} \left(1 + \frac{32 f^2}{L^4} x^2\right) dx = 2 \left[\frac{L}{2} + \frac{32 f^2}{3 L^4} \left(\frac{L}{2}\right)^3\right]$$
+</div>
+<div class="equation">
+$$\boxed{S \approx L \left[1 + \frac{8}{3}\left(\frac{f}{L}\right)^2\right]}$$
+</div>
+</div>
+
+</section>
+
+
+
+<!-- =======================================================
+4 ANIMATION 2D
+======================================================= -->
+
+<section id="animation2d" class="card">
+
+<h2>
+④ Animation 2D interactive
+</h2>
+
+<p>
+Faites varier le curseur ci-dessous pour voir l'impact de la flèche sur les composantes de forces.
+</p>
+
+<h3>Variation de la flèche $f$</h3>
+
+<input
+type="range"
+id="flècheRange"
+min="1"
+max="20"
+step="0.01"
+value="11.95"
+>
+
+
+<div class="grid">
+
+<div class="data">
+<div class="data-title">Flèche actuelle</div>
+<div class="data-value"><span id="currentF">11.95</span> m</div>
+</div>
+
+<div class="data">
+<div class="data-title">Demi-portée</div>
+<div class="data-value">7.50 m</div>
+</div>
+
+<div class="data">
+<div class="data-title">Poids demi-chaîne</div>
+<div class="data-value">375 kN</div>
+</div>
+
+<div class="data">
+<div class="data-title">Tension maximale (appui)</div>
+<div class="data-value"><span id="currentT">384.76</span> kN</div>
+</div>
+
+</div>
+
+
+<div class="canvas-wrapper">
+<canvas id="canvas2D" width="1200" height="620"></canvas>
+</div>
+
+
+<div class="buttons">
+<button onclick="animate2D()">▶ Animer l'affaissement</button>
+<button class="secondary" onclick="reset2D()">↺ Réinitialiser</button>
+</div>
+
+</section>
+
+
+
+<!-- =======================================================
+5 MODELE 3D
+======================================================= -->
+
+<section id="animation3d" class="card">
+
+<h2>
+⑤ Modèle 3D interactif
+</h2>
+
+<p>
+<strong>Cliquez et faites glisser la souris pour faire pivoter le modèle. Utilisez la molette pour zoomer.</strong>
+</p>
+
+<div id="scene3D"></div>
+
+</section>
+
+
+
+<!-- =======================================================
+6 TRAVAIL GUIDÉ
+======================================================= -->
+
+<section id="work" class="card">
+
+<h2>
+⑥ Démarche de résolution
+</h2>
+
+<div class="step">
+<span class="step-number">1</span>
+Calculer la demi-portée : $x_B = \frac{L}{2} = 7.5\text{ m}$.
+</div>
+
+<div class="step">
+<span class="step-number">2</span>
+Calculer la demi-longueur de la chaîne : $s_0 = \frac{S}{2} = 15\text{ m}$.
+</div>
+
+<div class="step">
+<span class="step-number">3</span>
+Résoudre l'équation non-linéaire $15 = a \sinh\left(\frac{7.5}{a}\right)$ pour déterminer $a$.
+</div>
+
+<div class="step">
+<span class="step-number">4</span>
+Déduire la flèche exacte $f = a \left[\cosh\left(\frac{7.5}{a}\right) - 1\right]$.
+</div>
+
+<div class="step">
+<span class="step-number">5</span>
+Calculer les forces et tensions $H, V, T_{\max}$.
+</div>
+
+</section>
+
+
+
+<!-- =======================================================
+7 SOLUTION
+======================================================= -->
+
+<section id="solution" class="card">
+
+<h2>
+⑦ Solution Numérique Détaillée Étape par Étape
+</h2>
+
+<h3>Méthode 1 — Calcul Exact de la Chaînette</h3>
+
+<div class="step">
+<strong>Étape 1 — Équation non-linéaire du paramètre $a$</strong>
+<p>En appliquant la formule de la demi-longueur $s_0 = a \sinh\left(\frac{x_B}{a}\right)$ :</p>
+<div class="equation">
+$$15 = a \sinh\left(\frac{7.5}{a}\right)$$
+</div>
+</div>
+
+
+<div class="step">
+<strong>Étape 2 — Changement de variable et méthode de Newton-Raphson</strong>
+<p>Posons $u = \frac{7.5}{a} \implies a = \frac{7.5}{u}$. L'équation devient :</p>
+<div class="equation">
+$$15 = \frac{7.5}{u} \sinh(u) \iff g(u) = \sinh(u) - 2u = 0$$
+</div>
+<p>Appliquons l'algorithme récursif de Newton-Raphson $u_{k+1} = u_k - \frac{g(u_k)}{g'(u_k)}$ avec $g'(u) = \cosh(u) - 2$ :</p>
+
+<ul>
+<li><strong>Initialisation $u_0 = 2.00000$ :</strong>
+$$g(2.0) = \sinh(2.0) - 4 = -0.37314$$
+$$g'(2.0) = \cosh(2.0) - 2 = 1.76220$$
+$$u_1 = 2.0 - \frac{-0.37314}{1.76220} = 2.21171$$
+</li>
+<li><strong>Iteration 1 ($u_1 = 2.21171$) :</strong>
+$$g(2.21171) = 0.07699, \quad g'(2.21171) = 2.61021$$
+$$u_2 = 2.21171 - \frac{0.07699}{2.61021} = 2.17772$$
+</li>
+<li><strong>Iteration 2 ($u_2 = 2.17772$) :</strong>
+$$g(2.17772) = 0.00097, \quad g'(2.17772) = 2.47006$$
+$$u_3 = 2.17772 - \frac{0.00097}{2.47006} = \mathbf{2.17733}$$
+</li>
+</ul>
+<p>La valeur convergée est $u \approx 2.17733$.</p>
+</div>
+
+
+<div class="step">
+<strong>Étape 3 — Détermination du paramètre $a$</strong>
+<div class="equation">
+$$\boxed{a = \frac{7.5}{2.17733} \approx 3.4446\text{ m}}$$
+</div>
+</div>
+
+
+<div class="step">
+<strong>Étape 4 — Calcul exact de la flèche $f$</strong>
+<p>Calcul de $\cosh(u)$ :</p>
+<div class="equation">
+$$\cosh(2.17733) = \sqrt{1 + \sinh^2(2.17733)} = \sqrt{1 + (2 \times 2.17733)^2} \approx 4.4680$$
+</div>
+<div class="equation">
+$$f = 3.4446 \times (4.4680 - 1) = 3.4446 \times 3.4680 = \mathbf{11.95\text{ m}}$$
+</div>
+</div>
+
+
+<div class="alert alert-success">
+<strong>Résultat Exact Chaînette :</strong>
+<h2 style="text-align:center">$$\boxed{f \approx 11.95\text{ m}}$$</h2>
+</div>
+
+
+<div class="step">
+<strong>Étape 5 — Calcul des forces et tensions</strong>
+<ul>
+<li><strong>Poids d'une demi-chaîne ($V$) :</strong>
+$$V = q \cdot s_0 = 25\text{ kN/m} \times 15\text{ m} = \mathbf{375\text{ kN}}$$
+</li>
+<li><strong>Tension horizontale au point bas ($H$) :</strong>
+$$H = q \cdot a = 25 \times 3.4446 = \mathbf{86.12\text{ kN}}$$
+</li>
+<li><strong>Tension maximale aux appuis ($T_{\max}$) :</strong>
+$$T_{\max} = \sqrt{H^2 + V^2} = \sqrt{86.12^2 + 375^2} = \mathbf{384.76\text{ kN}}$$
+</li>
+</ul>
+</div>
+
+<hr>
+
+<h3>Méthode 2 — Approximation Parabolique</h3>
+
+<div class="step">
+<p>Utilisons la formule approchée $S \approx L \left[1 + \frac{8}{3}\left(\frac{f}{L}\right)^2\right]$ :</p>
+<div class="equation">
+$$30 = 15 \left[1 + \frac{8}{3}\left(\frac{f}{15}\right)^2\right] \implies 2 = 1 + \frac{8 f^2}{675} \implies f^2 = 84.375$$
+</div>
+<div class="equation">
+$$\boxed{f_{\text{parabole}} = \sqrt{84.375} \approx \mathbf{9.19\text{ m}}}$$
+</div>
+<div class="equation">
+$$H_{\text{parabole}} = \frac{25 \times 15^2}{8 \times 9.1856} = \mathbf{76.54\text{ kN}}$$
+</div>
+</div>
+
+
+<div class="alert alert-danger">
+<strong>⚠️ Analyse de l'erreur du document initial ($216.87\text{ N}$) :</strong>
+<p>
+Le document original indique $f = 216.87\text{ N}$. Cette valeur comporte deux anomalies fondamentales :
+<br>1. <strong>Erreur d'unité :</strong> Une flèche $f$ est une distance ($\text{m}$) et non une force ($\text{N}$).
+<br>2. <strong>Limitation géométrique :</strong> Pour une chaîne de $30\text{ m}$ sur une portée de $15\text{ m}$, la flèche géométrique maximale absolue (chaîne complètement repliée en deux) ne peut dépasser $15\text{ m}$. La valeur physique réelle calculée selon la statique est **$11.95\text{ m}$**.
+</p>
+</div>
+
+
+<h3>Tableau Comparatif Synthétique</h3>
+
+<table>
+<tr>
+<th>Grandeur</th>
+<th>Chaînette (Exact)</th>
+<th>Parabole (Approché)</th>
+<th>Écart relatif</th>
+</tr>
+<tr>
+<td><strong>Flèche $f$</strong></td>
+<td><strong>11.95 m</strong></td>
+<td>9.19 m</td>
+<td>23.1%</td>
+</tr>
+<tr>
+<td><strong>Tension Horizontale $H$</strong></td>
+<td><strong>86.12 kN</strong></td>
+<td>76.54 kN</td>
+<td>11.1%</td>
+</tr>
+<tr>
+<td><strong>Tension Maximale $T_{\max}$</strong></td>
+<td><strong>384.76 kN</strong></td>
+<td>382.72 kN</td>
+<td>0.5%</td>
+</tr>
+</table>
+
+</section>
+
+</main>
+
+
+<!-- =======================================================
+FOOTER
+======================================================= -->
+
+<footer>
+<strong>Plateforme Pédagogique — Mécanique des Câbles</strong><br>
+Analyse Statique Exacte • Chaînette • Flèche
+</footer>
+
+
+<!-- =======================================================
+SCRIPTS ANIMATION 2D ET 3D
+======================================================= -->
+
+<script>
+
+/* =========================================================
+   ANIMATION 2D
+========================================================= */
+
+const canvas = document.getElementById("canvas2D");
+const ctx = canvas.getContext("2d");
+const range = document.getElementById("flècheRange");
+const currentF = document.getElementById("currentF");
+const currentT = document.getElementById("currentT");
+
+function arrow(x1, y1, x2, y2, label, color) {
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 3;
+
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - 14 * Math.cos(angle - 0.45), y2 - 14 * Math.sin(angle - 0.45));
+    ctx.lineTo(x2 - 14 * Math.cos(angle + 0.45), y2 - 14 * Math.sin(angle + 0.45));
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.font = "bold 18px Segoe UI";
+    ctx.fillText(label, x2 + 8, y2 - 8);
+}
+
+function draw2D() {
+    const f = parseFloat(range.value);
+    currentF.textContent = f.toFixed(2);
+
+    const L = 15;
+    const p = 25;
+    const Hforce = (p * L * L) / (8 * Math.max(f, 0.1));
+    const V = (p * L) / 2;
+    const T = Math.sqrt(Hforce * Hforce + V * V);
+
+    currentT.textContent = T.toFixed(2);
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const left = 100;
+    const right = 1100;
+    const deckY = 490;
+    const topY = 100;
+
+    const scaleX = (right - left) / L;
+    const scaleY = 320 / Math.max(f, 1);
+
+    ctx.fillStyle = "#142235";
+    ctx.font = "bold 25px Segoe UI";
+    ctx.fillText("Chaîne suspendue — vue en élévation", 40, 45);
+
+    /* Appuis */
+    ctx.fillStyle = "#384b60";
+    ctx.fillRect(left - 14, topY, 28, deckY - topY);
+    ctx.fillRect(right - 14, topY, 28, deckY - topY);
+
+    ctx.beginPath();
+    ctx.arc(left, topY, 12, 0, Math.PI * 2);
+    ctx.arc(right, topY, 12, 0, Math.PI * 2);
+    ctx.fill();
+
+    /* Chaîne */
+    ctx.strokeStyle = "#0b5ea8";
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+
+    for (let i = 0; i <= 250; i++) {
+        const x = (L * i) / 250;
+        const y = f * (1 - 4 * Math.pow(x / L - 0.5, 2));
+        const X = left + x * scaleX;
+        const Y = topY + (f - y) * scaleY;
+
+        if (i === 0) ctx.moveTo(X, Y);
+        else ctx.lineTo(X, Y);
+    }
+    ctx.stroke();
+
+    /* Flèche indication */
+    const mid = (left + right) / 2;
+    ctx.setLineDash([7, 6]);
+    ctx.strokeStyle = "#f2b632";
+    ctx.beginPath();
+    ctx.moveTo(mid, topY);
+    ctx.lineTo(mid, topY + f * scaleY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = "#a97800";
+    ctx.font = "bold 20px Segoe UI";
+    ctx.fillText("f = " + f.toFixed(2) + " m", mid + 12, topY + (f * scaleY) / 2);
+
+    /* Forces aux appuis */
+    arrow(right, topY, right - 100, topY, "H", "#198754");
+    arrow(right, topY, right, topY + 100, "V", "#d63b3b");
+    arrow(right, topY, right - 80, topY + 80, "T", "#0b5ea8");
+}
+
+range.addEventListener("input", draw2D);
+draw2D();
+
+function animate2D() {
+    let start = 1;
+    let end = 11.95;
+    let begin = performance.now();
+
+    function frame(time) {
+        const duration = 1800;
+        let progress = Math.min((time - begin) / duration, 1);
+        let smooth = (1 - Math.cos(progress * Math.PI)) / 2;
+        range.value = start + (end - start) * smooth;
+        draw2D();
+        if (progress < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+}
+
+function reset2D() {
+    range.value = 11.95;
+    draw2D();
+}
+
+
+/* =========================================================
+   MODELE 3D (THREE.JS)
+========================================================= */
+
+const container3D = document.getElementById("scene3D");
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xeaf0f5);
+
+const camera = new THREE.PerspectiveCamera(45, container3D.clientWidth / container3D.clientHeight, 0.1, 1000);
+camera.position.set(0, 5, 25);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(container3D.clientWidth, container3D.clientHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+container3D.appendChild(renderer.domElement);
+
+/* Lumières */
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+scene.add(ambientLight);
+
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+dirLight.position.set(10, 20, 15);
+scene.add(dirLight);
+
+/* Construction de la chaînette 3D */
+const a_param = 3.4446;
+const L_span = 15;
+const points3D = [];
+
+for (let i = 0; i <= 100; i++) {
+    const x = -L_span / 2 + (L_span * i) / 100;
+    const y = a_param * (Math.cosh(x / a_param) - 1);
+    points3D.push(new THREE.Vector3(x, -y + 6, 0));
+}
+
+const curve = new THREE.CatmullRomCurve3(points3D);
+const tubeGeo = new THREE.TubeGeometry(curve, 100, 0.25, 12, false);
+const tubeMat = new THREE.MeshStandardMaterial({ color: 0x0b5ea8, roughness: 0.3, metalness: 0.4 });
+const cableMesh = new THREE.Mesh(tubeGeo, tubeMat);
+scene.add(cableMesh);
+
+/* Tours d'appui */
+const towerGeo = new THREE.CylinderGeometry(0.4, 0.4, 12, 16);
+const towerMat = new THREE.MeshStandardMaterial({ color: 0x384b60 });
+
+const towerA = new THREE.Mesh(towerGeo, towerMat);
+towerA.position.set(-L_span / 2, 0, 0);
+scene.add(towerA);
+
+const towerB = new THREE.Mesh(towerGeo, towerMat);
+towerB.position.set(L_span / 2, 0, 0);
+scene.add(towerB);
+
+/* Grille au sol */
+const gridHelper = new THREE.GridHelper(30, 30, 0x0b5ea8, 0xc2d4e5);
+gridHelper.position.y = -6;
+scene.add(gridHelper);
+
+/* Interaction à la souris (Rotation) */
+let isDragging = false;
+let previousMousePosition = { x: 0, y: 0 };
+
+container3D.addEventListener('mousedown', () => { isDragging = true; });
+container3D.addEventListener('mousemove', (e) => {
+    if (isDragging) {
+        const deltaX = e.clientX - previousMousePosition.x;
+        const deltaY = e.clientY - previousMousePosition.y;
+        scene.rotation.y += deltaX * 0.008;
+        scene.rotation.x += deltaY * 0.008;
+    }
+    previousMousePosition = { x: e.clientX, y: e.clientY };
+});
+window.addEventListener('mouseup', () => { isDragging = false; });
+
+/* Loop de rendu */
+function animate3D() {
+    requestAnimationFrame(animate3D);
+    renderer.render(scene, camera);
+}
+animate3D();
+
+window.addEventListener('resize', () => {
+    if (!container3D) return;
+    camera.aspect = container3D.clientWidth / container3D.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container3D.clientWidth, container3D.clientHeight);
+});
+
+</script>
+
+</body>
+</html>

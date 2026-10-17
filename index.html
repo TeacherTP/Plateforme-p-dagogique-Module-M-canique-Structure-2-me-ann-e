@@ -4186,20 +4186,54 @@ Ouvrir
    TD — Nombre d'exercices par chapitre
 ========================================================= */
 
+/* =========================================================
+   TD — Liste des exercices par chapitre
+   Chaque exercice = son propre fichier HTML
+========================================================= */
+
 const TD_EXERCISES = {
 
-    1: 10,   // Chapter I  — 10 exercices
-    2: 8,    // Chapter II — 8 exercices
-    3: 10,   // Chapter III
-    4: 10,   // Chapter IV
-    5: 10,   // Chapter V
-    6: 10    // Chapter VI
+    1: [
+        { n: 1, file: "td/chapitre-01-exercice-01.html" },
+        { n: 2, file: "td/chapitre-01-exercice-02.html" }
+    ],
+
+    2: [
+        { n: 1, file: "td/chapitre-02-exercice-01.html" },
+        { n: 2, file: "td/chapitre-02-exercice-02.html" },
+        { n: 3, file: "td/chapitre-02-exercice-03.html" },
+        { n: 4, file: "td/chapitre-02-exercice-04.html" },
+        { n: 5, file: "td/chapitre-02-exercice-05.html" },
+        { n: 6, file: "td/chapitre-02-exercice-06.html" },
+        { n: 7, file: "td/chapitre-02-exercice-07.html" },
+        { n: 8, file: "td/chapitre-02-exercice-08.html" }
+    ],
+
+    3: [
+        { n: 1, file: "td/chapitre-03-exercice-01.html" }
+    ],
+
+    4: [
+        { n: 1, file: "td/chapitre-04-exercice-01.html" }
+    ],
+
+    5: [
+        { n: 1, file: "td/chapitre-05-exercice-01.html" }
+    ],
+
+    6: [
+        { n: 1, file: "td/chapitre-06-exercice-01.html" }
+    ]
 
 };
 
 
 /* =========================================================
    TD — Ouvre le fichier HTML de la solution du TD
+========================================================= */
+
+/* =========================================================
+   TD — Chaque exercice ouvre son propre fichier
 ========================================================= */
 
 function openTD(id){
@@ -4209,23 +4243,13 @@ function openTD(id){
     x=>x.id===id
     );
 
-    /* Nom du fichier : td/chapitre-02-td.html, ... */
-    const filename =
-    `td/chapitre-${String(id).padStart(2,"0")}-td.html`;
+    const exercices =
+    TD_EXERCISES[id] || [];
 
 
-    const nbExercices =
-    TD_EXERCISES[id] || 10;
-
-
-    /* Génération automatique des cartes exercices */
     let cardsHTML = "";
 
-    for(
-    let i=1;
-    i<=nbExercices;
-    i++
-    ){
+    exercices.forEach(ex => {
 
         cardsHTML += `
 
@@ -4236,7 +4260,7 @@ function openTD(id){
         </div>
 
         <h3>
-        Exercice ${String(i).padStart(2,"0")}
+        Exercice ${String(ex.n).padStart(2,"0")}
         </h3>
 
         <p>
@@ -4245,7 +4269,7 @@ function openTD(id){
 
         <a
         class="btn btn-primary"
-        href="${filename}#exercice-${i}"
+        href="${ex.file}"
         target="_blank"
         rel="noopener">
 
@@ -4257,7 +4281,7 @@ function openTD(id){
 
         `;
 
-    }
+    });
 
 
     openModal(`
@@ -4271,13 +4295,6 @@ function openTD(id){
     </h3>
 
     <div class="card">
-
-    <p>
-    <strong>
-    ${nbExercices} exercices
-    </strong>
-    — cliquez pour ouvrir la solution HTML.
-    </p>
 
     <div class="grid grid-2">
 
