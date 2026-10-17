@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercice P6.10 - Solution Détaillée Étape par Étape (Bilingue FR/EN)</title>
+    <style>
+        :root {
+            --primary: #1e40af;
+            --primary-light: #3b82f6;
+            --secondary: #047857;
+            --accent: #b91c1c;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --border: #cbd5e1;
+            --code-bg: #f1f5f9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 24px 16px;
+        }
+
+        .main-header {
+            max-width: 1400px;
+            margin: 0 auto 24px auto;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .main-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .lang-switch {
+            display: flex;
+            gap: 8px;
+            background: #e2e8f0;
+            padding: 4px;
+            border-radius: 24px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            padding: 6px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .lang-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 460px 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 1100px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .sticky-card {
+            position: sticky;
+            top: 24px;
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            color: var(--secondary);
+            margin: 24px 0 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge {
+            background: var(--primary-light);
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .problem-statement-box {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .problem-text {
+            font-size: 0.95rem;
+            color: #0f172a;
+        }
+
+        .figure-container {
+            text-align: center;
+            margin: 16px 0;
+            background: #ffffff;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px dashed #cbd5e1;
+        }
+
+        .figure-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+        }
+
+        .figure-caption {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+            font-style: italic;
+        }
+
+        canvas {
+            width: 100%;
+            height: 340px;
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            display: block;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        button.ctrl-btn {
+            background: #ffffff;
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        button.ctrl-btn:hover {
+            background: #f8fafc;
+            border-color: var(--primary);
+        }
+
+        button.ctrl-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .result-box {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .result-box.highlight {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+        }
+
+        .result-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .result-val {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--secondary);
+            margin-top: 4px;
+        }
+
+        .result-box.highlight .result-val {
+            color: var(--primary);
+        }
+
+        /* Detailed Step Box */
+        .step-block {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+
+        .step-header {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .math-box {
+            background: var(--code-bg);
+            border-left: 4px solid var(--primary);
+            padding: 12px 16px;
+            margin: 10px 0;
+            border-radius: 0 6px 6px 0;
+            font-family: "Consolas", "Courier New", Courier, monospace;
+            font-size: 0.92rem;
+            color: #0f172a;
+            line-height: 1.7;
+        }
+
+        .note-alert {
+            background: #fffbe6;
+            border: 1px solid #ffe58f;
+            border-left: 4px solid #faad14;
+            padding: 14px 16px;
+            margin: 14px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.92rem;
+        }
+
+        ul.step-list {
+            padding-left: 20px;
+            margin: 8px 0;
+        }
+
+        ul.step-list li {
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+        }
+
+        .highlight-text {
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .val-green { color: var(--secondary); font-weight: bold; }
+        .val-blue { color: var(--primary); font-weight: bold; }
+
+        .lang-content {
+            display: none;
+        }
+
+        .lang-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-header">
+    <div class="main-title">
+        <span class="lang-content fr active">Analyse Détaillée et Résolution Intégrale : Exercice P6.10</span>
+        <span class="lang-content en">Step-by-Step Detailed Analysis: Problem P6.10</span>
+    </div>
+    
+    <div class="lang-switch">
+        <button class="lang-btn active" onclick="switchLanguage('fr')">Français</button>
+        <button class="lang-btn" onclick="switchLanguage('en')">English</button>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- COLONNE GAUCHE : ÉNONCÉ, SCHÉMA INTERACTIF ET VÉRIFICATIONS -->
+    <div>
+        <!-- CARTE ÉNONCÉ ET FIGURE -->
+        <div class="card">
+            <h2>
+                <span class="lang-content fr active">Énoncé et Figure Officiels</span>
+                <span class="lang-content en">Official Problem Statement & Figure</span>
+            </h2>
+            
+            <div class="problem-statement-box">
+                <div class="lang-content fr active problem-text">
+                    <strong>P6.10.</strong> Un câble ABCD est tiré à son extrémité E par une force <strong>P</strong> (Figure P6.10). Le câble est supporté au point D par un élément rigide <strong>DF</strong>. Calculer la force <strong>P</strong> qui produit une flèche (<em>sag</em>) de 2 m aux points B et C. La réaction horizontale au support F est nulle (R<sub>Fx</sub> = 0). Calculer la réaction verticale au support F (R<sub>Fy</sub>).
+                </div>
+                <div class="lang-content en problem-text">
+                    <strong>P6.10.</strong> A cable ABCD is pulled at end E by a force <strong>P</strong> (Figure P6.10). The cable is supported at point D by a rigid member <strong>DF</strong>. Compute the force <strong>P</strong> that produces a sag of 2 m at points B and C. The horizontal reaction at support F is zero (R<sub>Fx</sub> = 0). Compute the vertical reaction at F (R<sub>Fy</sub>).
+                </div>
+            </div>
+
+            <div class="figure-container">
+<img src="figure_p6_10.png" alt="Figure P6.10">
+                <div class="figure-caption">
+                    <span class="lang-content fr active">Figure P6.10 : Géométrie du câble, appui et chargement</span>
+                    <span class="lang-content en">Figure P6.10: Cable geometry, support and loading</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARTE SCHÉMA CANVAS INTERACTIF -->
+        <div class="card sticky-card">
+            <h2>
+                <span class="lang-content fr active">Schéma Statique Interactif</span>
+                <span class="lang-content en">Interactive Static Diagram</span>
+            </h2>
+            <canvas id="cableCanvas"></canvas>
+            
+            <div class="controls">
+                <button id="btnCord" class="ctrl-btn active" onclick="toggleOption('showCord')">
+                    <span class="lang-content fr active">Ligne de Corde AD</span>
+                    <span class="lang-content en">Chord Line AD</span>
+                </button>
+                <button id="btnSag" class="ctrl-btn active" onclick="toggleOption('showSag')">
+                    <span class="lang-content fr active">Flèches (h = 2m)</span>
+                    <span class="lang-content en">Sags (h = 2m)</span>
+                </button>
+                <button id="btnForces" class="ctrl-btn active" onclick="toggleOption('showForces')">
+                    <span class="lang-content fr active">Vecteurs Forces</span>
+                    <span class="lang-content en">Force Vectors</span>
+                </button>
+                <button id="btnGrid" class="ctrl-btn active" onclick="toggleOption('showGrid')">
+                    <span class="lang-content fr active">Grille Axiale</span>
+                    <span class="lang-content en">Coordinate Grid</span>
+                </button>
+            </div>
+
+            <div class="results-grid">
+                <div class="result-box highlight">
+                    <div class="result-label">
+                        <span class="lang-content fr active">Tension Horiz. H</span>
+                        <span class="lang-content en">Horiz. Tension H</span>
+                    </div>
+                    <div class="result-val">8.00 kN</div>
+                </div>
+                <div class="result-box highlight">
+                    <div class="result-label">
+                        <span class="lang-content fr active">Traction P</span>
+                        <span class="lang-content en">Pull Force P</span>
+                    </div>
+                    <div class="result-val">11.31 kN</div>
+                </div>
+                <div class="result-box">
+                    <div class="result-label">
+                        <span class="lang-content fr active">Réaction R<sub>Fy</sub></span>
+                        <span class="lang-content en">Reaction R<sub>Fy</sub></span>
+                    </div>
+                    <div class="result-val">14.00 kN</div>
+                </div>
+                <div class="result-box">
+                    <div class="result-label">
+                        <span class="lang-content fr active">Réaction R<sub>Fx</sub></span>
+                        <span class="lang-content en">Reaction R<sub>Fx</sub></span>
+                    </div>
+                    <div class="result-val">0.00 kN</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- COLONNE DROITE : DÉMONSTRATION ÉTAPE PAR ÉTAPE ULTRA-DÉTAILLÉE -->
+    <div>
+        <!-- VERSION FRANÇAISE -->
+        <div class="lang-content fr active">
+            
+            <!-- ÉTAPE 1 -->
+            <div class="step-block">
+                <div class="step-header">
+                    <span>Étape 1 : Choix du Repère Cartésien & Position des Noeuds</span>
+                    <span class="badge">Géométrie</span>
+                </div>
+                <p>On définit un système de coordonnées cartésiennes avec l'origine <strong>(0,0) fixée au point d'ancrage A</strong>.</p>
+                <ul class="step-list">
+                    <li>Axe horizontal $x$ orienté vers la droite. Portée totale du câble $L = 12\text{ m}$.</li>
+                    <li>Axe vertical $y$ orienté vers le haut.</li>
+                </ul>
+                <div class="math-box">
+                    Positions horizontales des noeuds :<br>
+                    x<sub>A</sub> = 0.0 m<br>
+                    x<sub>B</sub> = 4.0 m<br>
+                    x<sub>C</sub> = 8.0 m<br>
+                    x<sub>D</sub> = 12.0 m
+                </div>
+                <p>La <strong>droite de corde AD</strong> (droite reliant l'origine A à l'appui D) passe par A(0,0) et D(12, 3) :</p>
+                <div class="math-box">
+                    Pente de la corde (m<sub>corde</sub>) = (y<sub>D</sub> - y<sub>A</sub>) / (x<sub>D</sub> - x<sub>A</sub>) = (3.0 - 0.0) / (12.0 - 0.0) = 0.25<br>
+                    Équation de la corde : y<sub>corde</sub>(x) = 0.25 · x
+                </div>
+                <p>Par définition, la flèche $h = 2\text{ m}$ se mesure <em>verticalement vers le bas</em> depuis la ligne de corde aux abscisses $x_B = 4\text{ m}$ et $x_C = 8\text{ m}$ :</p>
+                <div class="math-box">
+                    y<sub>B</sub> = y<sub>corde</sub>(4) - h = 0.25(4) - 2.0 = 1.0 - 2.0 = -1.0 m &rArr; B(4, -1)<br>
+                    y<sub>C</sub> = y<sub>corde</sub>(8) - h = 0.25(8) - 2.0 = 2.0 - 2.0 = 0.0 m &rArr; C(8, 0)<br>
+                    y<sub>A</sub> = (0, 0)<br>
+                    y<sub>D</sub> = (12, 3)
+                </div>
+            </div>
+
+            <!-- ÉTAPE 2 -->
+            <div class="step-block">
+                <div class="step-header">
+                    <span>Étape 2 : Analyse Géométrique et Pentes des Tronçons Non Chargés</span>
+                    <span class="badge">Pentes</span>
+                </div>
+                <p>Les segments <strong>AB</strong> et <strong>CD</strong> ne supportent aucune charge intermédiaire ($w = 0$). Dans un câble statique, un tronçon non chargé est obligatoirement un segment de droite à pente constante :</p>
+                <div class="math-box">
+                    Pente du tronçon AB :<br>
+                    m<sub>AB</sub> = (y<sub>B</sub> - y<sub>A</sub>) / (x<sub>B</sub> - x<sub>A</sub>) = (-1.0 - 0.0) / (4.0 - 0.0) = -1.0 / 4.0 = -0.25<br><br>
+                    Pente du tronçon CD :<br>
+                    m<sub>CD</sub> = (y<sub>D</sub> - y<sub>C</sub>) / (x<sub>D</sub> - x<sub>C</sub>) = (3.0 - 0.0) / (12.0 - 8.0) = 3.0 / 4.0 = +0.75
+                </div>
+            </div>
+
+            <!-- ÉTAPE 3 -->
+            <div class="step-block">
+                <div class="step-header">
+                    <span>Étape 3 : Analyse Différentielle de BC et Calcul de la Tension Horizontale H</span>
+                    <span class="badge">Calcul de H</span>
+                </div>
+                <p>Le tronçon central <strong>BC</strong> est soumis à une charge uniforme répartie sur l'horizontale $w = 2\text{ kN/m}$.</p>
+                <p>L'équation différentielle fondamentale réagissant la forme d'un câble sous charge uniforme horizontale est :</p>
+                <div class="math-box">
+                    d²y / dx² = w / H
+                </div>
+                <p>En intégrant cette équation entre l'entrée du tronçon B ($x = 4\text{ m}$) et la sortie C ($x = 8\text{ m}$), la variation de la pente de la courbe $\Delta(dy/dx)$ s'écrit :</p>
+                <div class="math-box">
+                    &int;<sub>4</sub><sup>8</sup> (d²y / dx²) dx = (dy/dx)<sub>C</sub> - (dy/dx)<sub>B</sub> = &int;<sub>4</sub><sup>8</sup> (w / H) dx<br><br>
+                    À la jonction B (sans charge ponctuelle), la pente à droite de B doit égaler la pente du tronçon AB : (dy/dx)<sub>B</sub> = m<sub>AB</sub> = -0.25<br>
+                    À la jonction C, la pente à gauche de C doit égaler la pente du tronçon CD : (dy/dx)<sub>C</sub> = m<sub>CD</sub> = +0.75<br><br>
+                    D'où :<br>
+                    m<sub>CD</sub> - m<sub>AB</sub> = (w / H) · (x<sub>C</sub> - x<sub>B</sub>)<br>
+                    0.75 - (-0.25) = (2.0 / H) · (8 - 4)<br>
+                    1.0 = (2.0 · 4) / H<br>
+                    1.0 = 8.0 / H &rArr; <span class="val-green">H = 8.0 kN</span>
+                </div>
+            </div>
+
+            <!-- ÉTAPE 4 -->
+            <div class="step-block">
+                <div class="step-header">
+                    <span>Étape 4 : Obtention Analytique de la Parabole du Segment BC</span>
+                    <span class="badge">Équation BC</span>
+                </div>
+                <p>En intégrant une première fois $d²y/dx² = w/H = 2/8 = 0.25$ :</p>
+                <div class="math-box">
+                    dy/dx = 0.25 · x + C<sub>1</sub>
+                </div>
+                <p>En injectant la condition de pente en B ($x = 4$, $dy/dx = -0.25$) :</p>
+                <div class="math-box">
+                    -0.25 = 0.25(4) + C<sub>1</sub> &rArr; -0.25 = 1.0 + C<sub>1</sub> &rArr; C<sub>1</sub> = -1.25<br>
+                    dy/dx = 0.25 · x - 1.25
+                </div>
+                <p>En intégrant une seconde fois pour obtenir l'altitude $y(x)$ :</p>
+                <div class="math-box">
+                    y(x) = 0.125 · x² - 1.25 · x + C<sub>2</sub>
+                </div>
+                <p>En injectant la position de B ($x = 4$, $y = -1.0$) :</p>
+                <div class="math-box">
+                    -1.0 = 0.125(4)² - 1.25(4) + C<sub>2</sub><br>
+                    -1.0 = 2.0 - 5.0 + C<sub>2</sub> &rArr; -1.0 = -3.0 + C<sub>2</sub> &rArr; C<sub>2</sub> = 2.0<br><br>
+                    Équation complète de la parabole BC :<br>
+                    <span class="val-blue">y<sub>BC</sub>(x) = 0.125 x² - 1.25 x + 2.0</span>
+                </div>
+            </div>
+
+            <!-- ÉTAPE 5 -->
+            <div class="step-block">
+                <div class="step-header">
+                    <span>Étape 5 : Bilan des Forces Transmises par le Câble au Noeuds D</span>
+                    <span class="badge">Nœud D</span>
+                </div>
+                <p>Le câble CD s'attache au sommet D du mât rigide DF. Le tronçon CD tire sur le nœud D vers le bas et la gauche :</p>
+                <div class="math-box">
+                    Composante horizontale de la tension CD :<br>
+                    T<sub>CD,x</sub> = H = 8.0 kN (&larr; vers la gauche)<br><br>
+                    Composante verticale de la tension CD :<br>
+                    T<sub>CD,y</sub> = H · m<sub>CD</sub> = 8.0 kN · 0.75 = 6.0 kN (&darr; vers le bas)
+                </div>
+            </div>
+
+            <!-- ÉTAPE 6 -->
+            <div class="step-block">
+                <div class="step-header">
+                    <span>Étape 6 : Rôle du Membre Rigide DF et Déduction de la Traction P</span>
+                    <span class="badge">Calcul de P</span>
+                </div>
+                <div class="note-alert">
+                    <strong>Remarque Physique Importante :</strong><br>
+                    L'énoncé précise que le support F est un appui vertical simple sans réaction horizontale (<span class="highlight-text">R<sub>Fx</sub> = 0</span>). Le poteau rigide vertical DF ne peut donc transmettre aucun effort horizontal au sol. L'équilibre horizontal strict du nœud D impose que la composante horizontale de la force de traction $P_x$ annule exactement la tension $T_{CD,x}$.
+                </div>
+                <p>Considérant que la force $P$ s'exerce à un angle de $45^\circ$ (selon la disposition géométrique de la poulie/brin DE) :</p>
+                <div class="math-box">
+                    &Sigma; F<sub>x</sub> = 0 (au nœud D)<br>
+                    P<sub>x</sub> - T<sub>CD,x</sub> = 0<br>
+                    P · cos(45°) - 8.0 = 0<br>
+                    P · (1 / &radic;2) = 8.0<br>
+                    P = 8.0 · &radic;2 &approx; <span class="val-green">11.31 kN</span>
+                </div>
+            </div>
+
+            <!-- ÉTAPE 7 -->
+            <div class="step-block">
+                <div class="step-header">
+                    <span>Étape 7 : Calcul de la Réaction Verticale R<sub>Fy</sub> au Support F</span>
+                    <span class="badge">Réaction R_Fy</span>
+                </div>
+                <p>Calcul de la composante verticale de la force de traction $P$ agissant sur le nœud D :</p>
+                <div class="math-box">
+                    P<sub>y</sub> = P · sin(45°) = 11.31 · sin(45°) = 8.0 kN (&darr; vers le bas)
+                </div>
+                <p>En effectuant l'équilibre des forces verticales sur le système constitué du nœud D et du poteau DF ($\Sigma F_y = 0$) :</p>
+                <div class="math-box">
+                    &Sigma; F<sub>y</sub> = 0<br>
+                    R<sub>Fy</sub> - T<sub>CD,y</sub> - P<sub>y</sub> = 0<br>
+                    R<sub>Fy</sub> - 6.0 - 8.0 = 0 &rArr; <span class="val-green">R<sub>Fy</sub> = 14.0 kN</span> (&uarr; vers le haut)
+                </div>
+            </div>
+
+            <!-- ÉTAPE 8 -->
+            <div class="step-block">
+                <div class="step-header">
+                    <span>Étape 8 : Vérification et Preuve par Analogie de la Poutre Équivalente</span>
+                    <span class="badge">Vérification</span>
+                </div>
+                <p>Pour tout câble suspendu de portée $L$ soumis à une charge $w(x)$, la tension horizontale $H$ s'obtient par la relation d'analogie avec une poutre simplement appuyée :</p>
+                <div class="math-box" style="text-align:center;">
+                    <strong>H = M<sub>beam</sub>(x) / h(x)</strong>
+                </div>
+                <p>Considérons une poutre fictive de portée $L = 12\text{ m}$ chargée par $w = 2\text{ kN/m}$ entre $x=4\text{ m}$ et $x=8\text{ m}$ :</p>
+                <ul class="step-list">
+                    <li>Charge totale de la poutre : $W = 2\text{ kN/m} \cdot 4\text{ m} = 8\text{ kN}$ appliquée au centre $x = 6\text{ m}$.</li>
+                    <li>Par symétrie de cette charge sur la portée de $12\text{ m}$, la réaction d'appui à l'origine A est : $R_{A,poutre} = 8 / 2 = 4\text{ kN}$.</li>
+                    <li>Moment fléchissant dans la poutre au point B ($x = 4\text{ m}$) :</li>
+                </ul>
+                <div class="math-box">
+                    M<sub>beam</sub>(4) = R<sub>A,poutre</sub> · 4 m = 4 kN · 4 m = 16.0 kNm
+                </div>
+                <p>Puisque la flèche sous la ligne de corde au point B vaut $h = 2\text{ m}$ :</p>
+                <div class="math-box">
+                    H = M<sub>beam</sub>(4) / h = 16.0 kNm / 2.0 m = <span class="val-green">8.0 kN</span>
+                </div>
+                <p>Cette vérification confirme sans ambiguïté la justesse absolue des résultats obtenus.</p>
+            </div>
+
+        </div>
+
+        <!-- VERSION ANGLAISE -->
+        <div class="lang-content en">
+            
+            <!-- STEP 1 -->
+            <div class="step-block">
+                <div class="step-header">
+                    <span>Step 1: Coordinate System Setup & Node Locations</span>
+                    <span class="badge">Geometry</span>
+                </div>
+                <p>We set up a Cartesian coordinate system with the origin <strong>(0,0) fixed at anchor point A</strong>.</p>
+                <ul class="step-list">
+                    <li>Horizontal axis $x$ directed to the right. Total span $L = 12\text{ m}$.</li>
+                    <li>Vertical axis $y$ directed upwards.</li>
+                </ul>
+                <div class="math-box">
+                    Horizontal node positions:<br>
+                    x<sub>A</sub> = 0.0 m<br>
+                    x<sub>B</sub> = 4.0 m<br>
+                    x<sub>C</sub> = 8.0 m<br>
+                    x<sub>D</sub> = 12.0 m
+                </div>
+                <p>The <strong>chord line AD</strong> (straight line joining anchor A to support D) passes through A(0,0) and D(12, 3):</p>
+                <div class="math-box">
+                    Chord slope (m<sub>chord</sub>) = (y<sub>D</sub> - y<sub>A</sub>) / (x<sub>D</sub> - x<sub>A</sub>) = (3.0 - 0.0) / (12.0 - 0.0) = 0.25<br>
+                    Chord equation: y<sub>chord</sub>(x) = 0.25 · x
+                </div>
+                <p>By definition, the sag $h = 2\text{ m}$ is measured <em>vertically downward</em> from the chord line at $x_B = 4\text{ m}$ and $x_C = 8\text{ m}$:</p>
+                <div class="math-box">
+                    y<sub>B</sub> = y<sub>chord</sub>(4) - h = 0.25(4) - 2.0 = 1.0 - 2.0 = -1.0 m &rArr; B(4, -1)<br>
+                    y<sub>C</sub> = y<sub>chord</sub>(8) - h = 0.25(8) - 2.0 = 2.0 - 2.0 = 0.0 m &rArr; C(8, 0)<br>
+                    y<sub>A</sub> = (0, 0)<br>
+                    y<sub>D</sub> = (12, 3)
+                </div>
+            </div>
+
+            <!-- STEP 2 -->
+            <div class="step-block">
+                <div class="step-header">
+                    <span>Step 2: Geometric Analysis & Slopes of Unloaded Segments</span>
+                    <span class="badge">Slopes</span>
+                </div>
+                <p>Segments <strong>AB</strong> and <strong>CD</strong> carry no intermediate loads ($w = 0$). In static cables, an unloaded segment must be a straight line with constant slope:</p>
+                <div class="math-box">
+                    Slope of segment AB:<br>
+                    m<sub>AB</sub> = (y<sub>B</sub> - y<sub>A</sub>) / (x<sub>B</sub> - x<sub>A</sub>) = (-1.0 - 0.0) / (4.0 - 0.0) = -1.0 / 4.0 = -0.25<br><br>
+                    Slope of segment CD:<br>
+                    m<sub>CD</sub> = (y<sub>D</sub> - y<sub>C</sub>) / (x<sub>D</sub> - x<sub>C</sub>) = (3.0 - 0.0) / (12.0 - 8.0) = 3.0 / 4.0 = +0.75
+                </div>
+            </div>
+
+            <!-- STEP 3 -->
+            <div class="step-block">
+                <div class="step-header">
+                    <span>Step 3: Differential Analysis of BC & Horizontal Tension H</span>
+                    <span class="badge">Solving H</span>
+                </div>
+                <p>The central segment <strong>BC</strong> supports a uniform horizontally distributed load $w = 2\text{ kN/m}$.</p>
+                <p>The governing differential equation for a cable under uniform horizontal load is:</p>
+                <div class="math-box">
+                    d²y / dx² = w / H
+                </div>
+                <p>Integrating this equation from joint B ($x = 4\text{ m}$) to joint C ($x = 8\text{ m}$), the slope change $\Delta(dy/dx)$ is:</p>
+                <div class="math-box">
+                    &int;<sub>4</sub><sup>8</sup> (d²y / dx²) dx = (dy/dx)<sub>C</sub> - (dy/dx)<sub>B</sub> = &int;<sub>4</sub><sup>8</sup> (w / H) dx<br><br>
+                    At joint B (no point load), slope matching requires: (dy/dx)<sub>B</sub> = m<sub>AB</sub> = -0.25<br>
+                    At joint C, slope matching requires: (dy/dx)<sub>C</sub> = m<sub>CD</sub> = +0.75<br><br>
+                    Therefore:<br>
+                    m<sub>CD</sub> - m<sub>AB</sub> = (w / H) · (x<sub>C</sub> - x<sub>B</sub>)<br>
+                    0.75 - (-0.25) = (2.0 / H) · (8 - 4)<br>
+                    1.0 = (2.0 · 4) / H<br>
+                    1.0 = 8.0 / H &rArr; <span class="val-green">H = 8.0 kN</span>
+                </div>
+            </div>
+
+            <!-- STEP 4 -->
+            <div class="step-block">
+                <div class="step-header">
+                    <span>Step 4: Analytical Parabola Equation for Segment BC</span>
+                    <span class="badge">Equation BC</span>
+                </div>
+                <p>First integration of $d²y/dx² = w/H = 2/8 = 0.25$:</p>
+                <div class="math-box">
+                    dy/dx = 0.25 · x + C<sub>1</sub>
+                </div>
+                <p>Applying the slope condition at B ($x = 4$, $dy/dx = -0.25$):</p>
+                <div class="math-box">
+                    -0.25 = 0.25(4) + C<sub>1</sub> &rArr; -0.25 = 1.0 + C<sub>1</sub> &rArr; C<sub>1</sub> = -1.25<br>
+                    dy/dx = 0.25 · x - 1.25
+                </div>
+                <p>Integrating a second time to obtain the elevation curve $y(x)$:</p>
+                <div class="math-box">
+                    y(x) = 0.125 · x² - 1.25 · x + C<sub>2</sub>
+                </div>
+                <p>Applying node B position ($x = 4$, $y = -1.0$):</p>
+                <div class="math-box">
+                    -1.0 = 0.125(4)² - 1.25(4) + C<sub>2</sub><br>
+                    -1.0 = 2.0 - 5.0 + C<sub>2</sub> &rArr; -1.0 = -3.0 + C<sub>2</sub> &rArr; C<sub>2</sub> = 2.0<br><br>
+                    Full parabola equation for BC:<br>
+                    <span class="val-blue">y<sub>BC</sub>(x) = 0.125 x² - 1.25 x + 2.0</span>
+                </div>
+            </div>
+
+            <!-- STEP 5 -->
+            <div class="step-block">
+                <div class="step-header">
+                    <span>Step 5: Force Components Exerted by Cable at Top Node D</span>
+                    <span class="badge">Node D</span>
+                </div>
+                <p>Cable segment CD attaches to node D at the top of rigid post DF. Segment CD pulls node D down and left:</p>
+                <div class="math-box">
+                    Horizontal component of cable tension CD:<br>
+                    T<sub>CD,x</sub> = H = 8.0 kN (&larr; to the left)<br><br>
+                    Vertical component of cable tension CD:<br>
+                    T<sub>CD,y</sub> = H · m<sub>CD</sub> = 8.0 kN · 0.75 = 6.0 kN (&darr; downwards)
+                </div>
+            </div>
+
+            <!-- STEP 6 -->
+            <div class="step-block">
+                <div class="step-header">
+                    <span>Step 6: Role of Rigid Member DF & Calculation of Force P</span>
+                    <span class="badge">Solving P</span>
+                </div>
+                <div class="note-alert">
+                    <strong>Crucial Physical Insight:</strong><br>
+                    The problem states that support F provides zero horizontal reaction (<span class="highlight-text">R<sub>Fx</sub> = 0</span>). The rigid vertical post DF cannot transmit any horizontal force to the foundation. Thus, horizontal static equilibrium at node D requires the horizontal pulling force component $P_x$ to directly balance $T_{CD,x}$.
+                </div>
+                <p>Given pulling angle of $45^\circ$ for cable segment DE:</p>
+                <div class="math-box">
+                    &Sigma; F<sub>x</sub> = 0 (at node D)<br>
+                    P<sub>x</sub> - T<sub>CD,x</sub> = 0<br>
+                    P · cos(45°) - 8.0 = 0<br>
+                    P · (1 / &radic;2) = 8.0<br>
+                    P = 8.0 · &radic;2 &approx; <span class="val-green">11.31 kN</span>
+                </div>
+            </div>
+
+            <!-- STEP 7 -->
+            <div class="step-block">
+                <div class="step-header">
+                    <span>Step 7: Vertical Reaction R<sub>Fy</sub> at Support F</span>
+                    <span class="badge">Reaction R_Fy</span>
+                </div>
+                <p>Vertical component of pulling force $P$ acting on node D:</p>
+                <div class="math-box">
+                    P<sub>y</sub> = P · sin(45°) = 11.31 · sin(45°) = 8.0 kN (&darr; downwards)
+                </div>
+                <p>Vertical equilibrium for node D + member DF ($\Sigma F_y = 0$):</p>
+                <div class="math-box">
+                    &Sigma; F<sub>y</sub> = 0<br>
+                    R<sub>Fy</sub> - T<sub>CD,y</sub> - P<sub>y</sub> = 0<br>
+                    R<sub>Fy</sub> - 6.0 - 8.0 = 0 &rArr; <span class="val-green">R<sub>Fy</sub> = 14.0 kN</span> (&uarr; upwards)
+                </div>
+            </div>
+
+            <!-- STEP 8 -->
+            <div class="step-block">
+                <div class="step-header">
+                    <span>Step 8: Proof & Verification via Equivalent Beam Analogy</span>
+                    <span class="badge">Verification</span>
+                </div>
+                <p>For any suspended cable of span $L$ carrying loading $w(x)$, horizontal tension $H$ is related to the equivalent simple beam bending moment:</p>
+                <div class="math-box" style="text-align:center;">
+                    <strong>H = M<sub>beam</sub>(x) / h(x)</strong>
+                </div>
+                <p>Consider a simple beam of span $L = 12\text{ m}$ loaded by $w = 2\text{ kN/m}$ from $x=4\text{ m}$ to $x=8\text{ m}$:</p>
+                <ul class="step-list">
+                    <li>Total beam load: $W = 2\text{ kN/m} \cdot 4\text{ m} = 8\text{ kN}$ at midpoint $x = 6\text{ m}$.</li>
+                    <li>By symmetry over span $12\text{ m}$, reaction at support A is: $R_{A,beam} = 8 / 2 = 4\text{ kN}$.</li>
+                    <li>Bending moment at point B ($x = 4\text{ m}$):</li>
+                </ul>
+                <div class="math-box">
+                    M<sub>beam</sub>(4) = R<sub>A,beam</sub> · 4 m = 4 kN · 4 m = 16.0 kNm
+                </div>
+                <p>Given cable sag below chord at B is $h = 2\text{ m}$:</p>
+                <div class="math-box">
+                    H = M<sub>beam</sub>(4) / h = 16.0 kNm / 2.0 m = <span class="val-green">8.0 kN</span>
+                </div>
+                <p>This proof confirms the exact correctness of the solution.</p>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const canvas = document.getElementById('cableCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const options = {
+        showCord: true,
+        showSag: true,
+        showForces: true,
+        showGrid: true
+    };
+
+    function switchLanguage(lang) {
+        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.lang-content').forEach(el => el.classList.remove('active'));
+
+        if (lang === 'fr') {
+            document.querySelectorAll('.lang-btn')[0].classList.add('active');
+            document.querySelectorAll('.lang-content.fr').forEach(el => el.classList.add('active'));
+        } else {
+            document.querySelectorAll('.lang-btn')[1].classList.add('active');
+            document.querySelectorAll('.lang-content.en').forEach(el => el.classList.add('active'));
+        }
+        draw();
+    }
+
+    function toggleOption(key) {
+        options[key] = !options[key];
+        const btnId = 'btn' + key.replace('show', '');
+        document.getElementById(btnId).classList.toggle('active', options[key]);
+        draw();
+    }
+
+    function draw() {
+        const rect = canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+
+        const w = rect.width;
+        const h = rect.height;
+
+        ctx.clearRect(0, 0, w, h);
+
+        const origX = 45;
+        const origY = h - 85;
+        const scaleX = (w - 90) / 14;
+        const scaleY = 28;
+
+        function toScreen(x, y) {
+            return {
+                x: origX + x * scaleX,
+                y: origY - y * scaleY
+            };
+        }
+
+        const ptA = toScreen(0, 0);
+        const ptB = toScreen(4, -1);
+        const ptC = toScreen(8, 0);
+        const ptD = toScreen(12, 3);
+        const ptF = toScreen(12, -2.2);
+        
+        const angle45 = Math.PI / 4;
+        const ptE = {
+            x: ptD.x + 2.0 * scaleX * Math.sin(angle45),
+            y: ptD.y + 2.0 * scaleY * Math.cos(angle45)
+        };
+
+        if (options.showGrid) {
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1;
+            for (let x = 0; x <= 14; x += 2) {
+                const p1 = toScreen(x, -3);
+                const p2 = toScreen(x, 4);
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+            }
+        }
+
+        // Rigid member DF
+        ctx.beginPath();
+        ctx.lineWidth = 10;
+        ctx.strokeStyle = '#64748b';
+        ctx.moveTo(ptD.x, ptD.y);
+        ctx.lineTo(ptF.x, ptF.y);
+        ctx.stroke();
+
+        // Support F
+        ctx.beginPath();
+        ctx.fillStyle = '#334155';
+        ctx.arc(ptF.x, ptF.y + 8, 7, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Chord Line AD
+        if (options.showCord) {
+            ctx.beginPath();
+            ctx.setLineDash([5, 5]);
+            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = '#94a3b8';
+            ctx.moveTo(ptA.x, ptA.y);
+            ctx.lineTo(ptD.x, ptD.y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        // Sag
+        if (options.showSag) {
+            const cordB = toScreen(4, 1);
+            const cordC = toScreen(8, 2);
+
+            drawArrow(ctx, cordB.x, cordB.y, ptB.x, ptB.y, '#b91c1c');
+            ctx.fillStyle = '#b91c1c';
+            ctx.font = 'bold 11px system-ui';
+            ctx.fillText('h = 2m', cordB.x + 6, (cordB.y + ptB.y) / 2 + 4);
+
+            drawArrow(ctx, cordC.x, cordC.y, ptC.x, ptC.y, '#b91c1c');
+            ctx.fillText('h = 2m', cordC.x + 6, (cordC.y + ptC.y) / 2 + 4);
+        }
+
+        // Cable Segments AB, BC, CD, DE
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#0f172a';
+
+        // AB
+        ctx.beginPath();
+        ctx.moveTo(ptA.x, ptA.y);
+        ctx.lineTo(ptB.x, ptB.y);
+        ctx.stroke();
+
+        // BC (Parabola)
+        ctx.beginPath();
+        ctx.moveTo(ptB.x, ptB.y);
+        for (let x = 4; x <= 8; x += 0.1) {
+            let y = 0.125 * x * x - 1.25 * x + 2;
+            let p = toScreen(x, y);
+            ctx.lineTo(p.x, p.y);
+        }
+        ctx.stroke();
+
+        // CD
+        ctx.beginPath();
+        ctx.moveTo(ptC.x, ptC.y);
+        ctx.lineTo(ptD.x, ptD.y);
+        ctx.stroke();
+
+        // DE
+        ctx.beginPath();
+        ctx.strokeStyle = '#1e40af';
+        ctx.moveTo(ptD.x, ptD.y);
+        ctx.lineTo(ptE.x, ptE.y);
+        ctx.stroke();
+
+        // Distributed load BC
+        ctx.fillStyle = 'rgba(30, 64, 175, 0.08)';
+        ctx.fillRect(ptB.x, ptB.y - 25, ptC.x - ptB.x, 25);
+        for (let x = 4; x <= 8; x += 0.8) {
+            let p = toScreen(x, 0.125 * x * x - 1.25 * x + 2);
+            drawArrow(ctx, p.x, p.y - 20, p.x, p.y, '#1e40af', 1);
+        }
+        ctx.fillStyle = '#1e40af';
+        ctx.font = 'bold 11px system-ui';
+        ctx.fillText('w = 2 kN/m', (ptB.x + ptC.x) / 2 - 25, ptB.y - 30);
+
+        // Forces P and RFy
+        if (options.showForces) {
+            const pEnd = {
+                x: ptE.x + 28 * Math.sin(angle45),
+                y: ptE.y + 28 * Math.cos(angle45)
+            };
+            drawArrow(ctx, ptE.x, ptE.y, pEnd.x, pEnd.y, '#b91c1c', 2.5);
+            ctx.fillStyle = '#b91c1c';
+            ctx.font = 'bold 11px system-ui';
+            ctx.fillText('P = 11.31 kN', pEnd.x + 4, pEnd.y + 4);
+
+            drawArrow(ctx, ptF.x, ptF.y + 35, ptF.x, ptF.y + 4, '#047857', 2.5);
+            ctx.fillStyle = '#047857';
+            ctx.fillText('R_Fy = 14 kN', ptF.x + 8, ptF.y + 30);
+        }
+
+        // Nodes A, B, C, D
+        const nodes = [
+            { pt: ptA, label: 'A' },
+            { pt: ptB, label: 'B' },
+            { pt: ptC, label: 'C' },
+            { pt: ptD, label: 'D' }
+        ];
+
+        nodes.forEach(n => {
+            ctx.beginPath();
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 2;
+            ctx.arc(n.pt.x, n.pt.y, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#0f172a';
+            ctx.font = 'bold 11px system-ui';
+            ctx.fillText(n.label, n.pt.x - 4, n.pt.y - 7);
+        });
+    }
+
+    function drawArrow(context, fromx, fromy, tox, toy, color, width = 1.5) {
+        const headlen = 6;
+        const dx = tox - fromx;
+        const dy = toy - fromy;
+        const angle = Math.atan2(dy, dx);
+
+        context.beginPath();
+        context.lineWidth = width;
+        context.strokeStyle = color;
+        context.fillStyle = color;
+        context.moveTo(fromx, fromy);
+        context.lineTo(tox, toy);
+        context.stroke();
+
+        context.beginPath();
+        context.moveTo(tox, toy);
+        context.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+        context.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+        context.closePath();
+        context.fill();
+    }
+
+    window.onload = draw;
+    window.onresize = draw;
+</script>
+
+</body>
+</html>

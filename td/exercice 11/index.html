@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyse Structurale & Simulation Hyper-Réaliste 3D - Pont Suspendu</title>
+
+    <!-- MathJax pour le rendu des équations mathématiques -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- Three.js & OrbitControls pour la modélisation 3D -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #090d16;
+            --bg-card: #131c2e;
+            --bg-element: #1e293b;
+            --accent-blue: #38bdf8;
+            --accent-green: #4ade80;
+            --accent-red: #f87171;
+            --accent-yellow: #facc15;
+            --accent-purple: #c084fc;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--bg-card);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .header-title h1 {
+            font-size: 1.4rem;
+            color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .lang-switch {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-lang {
+            background: var(--bg-element);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-lang.active, .btn-lang:hover {
+            background: var(--accent-blue);
+            color: var(--bg-dark);
+        }
+
+        nav.tabs {
+            display: flex;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 1rem;
+        }
+
+        .tab-btn {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-btn.active {
+            color: var(--accent-blue);
+            border-bottom-color: var(--accent-blue);
+            background: rgba(56, 189, 248, 0.08);
+        }
+
+        main {
+            flex: 1;
+            padding: 1.5rem;
+            max-width: 1750px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 1100px) {
+            .grid-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .card h2 {
+            color: var(--accent-blue);
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .img-container {
+            width: 100%;
+            text-align: center;
+            background: #0b1120;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 1rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .img-container img {
+            max-width: 100%;
+            max-height: 420px;
+            height: auto;
+            border-radius: 6px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+            display: block;
+            margin: 0 auto;
+        }
+
+        .image-uploader {
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .control-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .control-group label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.4rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent-blue);
+            height: 6px;
+            background: var(--bg-element);
+            border-radius: 3px;
+        }
+
+        .select-input {
+            width: 100%;
+            padding: 0.7rem;
+            background: var(--bg-element);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .val-badge {
+            color: var(--accent-yellow);
+            font-weight: bold;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .results-table th, .results-table td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .results-table th {
+            background: var(--bg-element);
+            color: var(--accent-blue);
+        }
+
+        canvas#canvas2d {
+            width: 100%;
+            height: 520px;
+            background: #020617;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            display: block;
+        }
+
+        #container3d {
+            width: 100%;
+            height: 700px;
+            background: #020617;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .overlay-info {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(15, 23, 42, 0.92);
+            padding: 14px 18px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            pointer-events: none;
+            backdrop-filter: blur(6px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            max-width: 420px;
+            line-height: 1.5;
+        }
+
+        .legend-box {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background: rgba(15, 23, 42, 0.92);
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 0.8rem;
+            pointer-events: none;
+            backdrop-filter: blur(6px);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        .step-box {
+            background: var(--bg-element);
+            border-left: 4px solid var(--accent-blue);
+            padding: 1.2rem;
+            margin-bottom: 1.5rem;
+            border-radius: 0 8px 8px 0;
+            line-height: 1.7;
+        }
+
+        .step-box h3 {
+            color: var(--accent-yellow);
+            font-size: 1.15rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .highlight-calc {
+            background: rgba(56, 189, 248, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-title">
+            <h1>🌉 Analyse Structurale & Simulation Hyper-Réaliste 3D - Pont Suspendu</h1>
+        </div>
+        <div class="lang-switch">
+            <button class="btn-lang active" onclick="setLanguage('fr')">FR</button>
+            <button class="btn-lang" onclick="setLanguage('en')">EN</button>
+        </div>
+    </header>
+
+    <nav class="tabs">
+        <button class="tab-btn active" onclick="switchTab('statement')" data-i18n="tab_statement">Énoncé & Démonstration Détaillée</button>
+        <button class="tab-btn" onclick="switchTab('sim2d')" data-i18n="tab_2d">Animation 2D & Diagrammes</button>
+        <button class="tab-btn" onclick="switchTab('sim3d')" data-i18n="tab_3d">Rendu 3D Réaliste & Physique Dynamique</button>
+    </nav>
+
+    <main>
+        <!-- TAB 1: STATEMENT & COMPLETE MATHEMATICAL PROOF -->
+        <div id="tab-statement" class="tab-content active">
+            <div class="grid-layout">
+                
+                <!-- Left Column: Problem Text & Local Image Direct Display -->
+                <div class="card">
+                    <h2 data-i18n="title_problem">Énoncé du Problème</h2>
+                    <p style="line-height: 1.7; color: #cbd5e1; font-size: 1.05rem;" data-i18n="problem_text">
+                        Un câble de suspension d'un pont suspendu (Figure II.6) supporte une charge uniformément répartie sur l'horizontale de <strong>$q = 120\text{ kN/m}$</strong> sur une portée <strong>$L = 300\text{ m}$</strong> avec une flèche <strong>$f = 30\text{ m}$</strong>. Les mâts ont une hauteur <strong>$h = 50\text{ m}$</strong>. Le câble d'ancrage fait un angle de <strong>$45^\circ$</strong> avec l'horizontale.
+                    </p>
+                    
+                    <ol style="margin-left: 1.5rem; margin-top: 1rem; line-height: 1.8; color: #cbd5e1;">
+                        <li data-i18n="q1"><strong>Tension maximale et dimensionnement :</strong> Calculer la tension maximale $T_{\max}$ dans le câble de suspension, l'inclinaison ($\alpha$) aux appuis A et B, ainsi que le diamètre minimal $d_{\min}$ du câble sachant que la contrainte admissible du matériau est $\sigma_{\text{adm}} = 1000\text{ N/mm}^2$.</li>
+                        <li data-i18n="q2"><strong>Cas 1 (Poulie sans frottement) :</strong> Si le câble passe par une poulie au sommet des mâts, calculer le moment de renversement à la base du mât ($M_{\text{mât}}$), l'effort axial vertical dans le mât ($N_{\text{mât}}$), et le poids minimal du massif d'ancrage ($w_{\text{anc}}$).</li>
+                        <li data-i18n="q3"><strong>Cas 2 (Chariot sur rouleaux) :</strong> Si le câble repose sur un chariot glissant (saddle), calculer la tension dans le câble d'ancrage ($T_{AD}$), le moment fléchissant à la base du mât, l'effort vertical ($N_{\text{mât}}$), et le poids requis pour le massif d'ancrage ($w_{\text{anc}}$).</li>
+                    </ol>
+
+                 <!-- 1. TEXTE DE VOTRE ANNONCE -->
+<div class="annonce">
+    <h2>Figure de l'exercice</h2>
+    <p>Voici figure du problème de pont suspendu :</p>
+</div>
+
+<!-- 2. PHOTO INSÉRÉE JUSTE EN DESSOUS -->
+<div style="text-align: center; margin-top: 15px;">
+    <img src="figure_p6_10.png" alt="Schéma du pont suspendu" style="max-width: 100%; height: auto; border-radius: 6px;">
+</div>
+                </div>
+
+                <!-- Right Column: Full Mathematical Derivations & Numerical Calculations -->
+                <div class="card">
+                    <h2 data-i18n="title_math">Démonstrations & Résolution Étape par Étape</h2>
+
+                    <!-- DEMONSTRATION 1: Équation globale avec origine à l'appui A -->
+                    <div class="step-box">
+                        <h3 data-i18n="demo1_title">1. Démonstration de $y(x) = \frac{4f}{L^2} x (L - x)$</h3>
+                        <p><strong>Repère :</strong> Origine $(0,0)$ à l'appui gauche $A$, axe $x$ horizontal vers la droite ($0 \le x \le L$), axe $y$ vertical orienté vers le bas.</p>
+                        <p><strong>1.1 Réactions aux appuis :</strong> Par symétrie verticale globale :
+                        $$V_A = V_B = \frac{q L}{2}$$</p>
+
+                        <p><strong>1.2 Effort tranchant fictif / Force verticale interne :</strong> Sur une section située à une distance $x$ :
+                        $$V(x) = V_A - q x = \frac{q L}{2} - q x = q \left(\frac{L}{2} - x\right)$$</p>
+
+                        <p><strong>1.3 Équation différentielle de la forme du câble :</strong>
+                        La pente $\frac{dy}{dx}$ en tout point est égale au rapport entre la force verticale interne $V(x)$ et la poussée horizontale constante $H$ :
+                        $$\frac{dy}{dx} = \frac{V(x)}{H} = \frac{q}{H} \left(\frac{L}{2} - x\right)$$</p>
+
+                        <p><strong>1.4 Intégration :</strong>
+                        $$y(x) = \int \frac{q}{H} \left(\frac{L}{2} - x\right) dx = \frac{q}{H} \left(\frac{L x}{2} - \frac{x^2}{2}\right) + C = \frac{q}{2H} x (L - x) + C$$
+                        À l'appui $A(0,0)$, $y(0) = 0 \implies C = 0$. Donc :
+                        $$y(x) = \frac{q}{2H} x (L - x)$$</p>
+
+                        <p><strong>1.5 Condition de flèche maximale :</strong> Au milieu de la portée ($x = \frac{L}{2}$), la flèche vaut $y = f$ :
+                        $$f = \frac{q}{2H} \left(\frac{L}{2}\right) \left(L - \frac{L}{2}\right) = \frac{q L^2}{8 H} \implies \frac{q}{2H} = \frac{4f}{L^2}$$
+                        En réinjectant $\frac{q}{2H}$ dans l'équation de $y(x)$, on obtient :
+                        $$\mathbf{y(x) = \frac{4f}{L^2} x (L - x)}$$</p>
+                    </div>
+
+                    <!-- DEMONSTRATION 2: Équation locale avec origine au sommet C -->
+                    <div class="step-box">
+                        <h3 data-i18n="demo2_title">2. Démonstration de $y = \frac{q_l}{2H} x^2$</h3>
+                        <p><strong>Repère :</strong> Origine $(0,0)$ au point le plus bas du câble $C$ (sommet parabole), axe $x$ horizontal, axe $y$ vertical vers le haut.</p>
+                        <p><strong>Équilibre d'un tronçon $CP$ de longueur $x$ :</strong><br>
+                        • En $C(0,0)$, la tangente est horizontale : la force verticale y est nulle, la tension se réduit à la poussée $H$.<br>
+                        • Charge verticale résultante : $W = q_l \cdot x$, appliquée à mi-distance $\frac{x}{2}$ du point $P(x,y)$.<br>
+                        • Équilibre des moments au point $P$ :
+                        $$\sum M_P = 0 \implies H \cdot y - W \cdot \left(\frac{x}{2}\right) = 0$$
+                        $$\implies H \cdot y - (q_l \cdot x) \cdot \frac{x}{2} = 0 \implies \mathbf{y = \frac{q_l}{2H} x^2}$$</p>
+                    </div>
+
+                    <!-- CALCULS NUMERIQUES EXPLICITES -->
+                    <div class="step-box">
+                        <h3 data-i18n="step1_title">3. Calculs Numériques Détaillés</h3>
+                        <p><strong>Données du problème :</strong> $q = 120\text{ kN/m}$, $L = 300\text{ m}$, $f = 30\text{ m}$, $h = 50\text{ m}$, $\sigma_{\text{adm}} = 1000\text{ N/mm}^2 = 1000\times 10^3\text{ kN/m}^2$.</p>
+                        
+                        <p style="margin-top:0.5rem;"><strong>3.1 Poussée horizontale $H$ et réaction $V_A$ :</strong>
+                        $$H = \frac{q L^2}{8 f} = \frac{120 \times 300^2}{8 \times 30} = \frac{10\,800\,000}{240} = \mathbf{45\,000\text{ kN} = 45\text{ MN}}$$
+                        $$V_A = \frac{q L}{2} = \frac{120 \times 300}{2} = \mathbf{18\,000\text{ kN} = 18\text{ MN}}$$</p>
+
+                        <p><strong>3.2 Inclinaison $\alpha$ et Tension Maximale $T_{\max}$ :</strong>
+                        $$\tan(\alpha) = \frac{V_A}{H} = \frac{18\,000}{45\,000} = 0{,}40 \implies \mathbf{\alpha = \arctan(0{,}40) \approx 21{,}80^\circ}$$
+                        $$T_{\max} = \sqrt{H^2 + V_A^2} = \sqrt{45\,000^2 + 18\,000^2} = \sqrt{2\,349\,000\,000} \approx \mathbf{48\,466{,}48\text{ kN} \approx 48{,}47\text{ MN}}$$</p>
+
+                        <p><strong>3.3 Section minimale et Diamètre $d_{\min}$ :</strong>
+                        $$A_{\min} = \frac{T_{\max}}{\sigma_{\text{adm}}} = \frac{48\,466{,}48 \times 10^3\text{ N}}{1000\text{ N/mm}^2} = 48\,466{,}48\text{ mm}^2$$
+                        $$d_{\min} = \sqrt{\frac{4 \cdot A_{\min}}{\pi}} = \sqrt{\frac{4 \times 48\,466{,}48}{3{,}14159}} \approx \mathbf{248{,}41\text{ mm} \approx 24{,}84\text{ cm}}$$</p>
+
+                        <p><strong>3.4 Analyse du Mât - Cas 1 (Poulie sans frottement) :</strong><br>
+                        Tension continue : $T_{AD} = T_{\max} = 48\,466{,}48\text{ kN}$.<br>
+                        Composantes d'ancrage ($\theta = 45^\circ$) :
+                        $$H_{\text{anc}} = V_{\text{anc}} = T_{AD} \cos(45^\circ) = 48\,466{,}48 \times 0{,}7071 = 34\,270{,}98\text{ kN}$$
+                        Déséquilibre horizontal au sommet du mât :
+                        $$\Delta H = H - H_{\text{anc}} = 45\,000 - 34\,270{,}98 = 10\,729{,}02\text{ kN}$$
+                        Moment fléchissant à la base du mât ($h = 50\text{ m}$) :
+                        $$M_{\text{mât}} = \Delta H \cdot h = 10\,729{,}02 \times 50 = \mathbf{536\,451\text{ kN}\cdot\text{m} = 536{,}45\text{ MN}\cdot\text{m}}$$
+                        Effort vertical axial dans le mât :
+                        $$N_{\text{mât}} = V_A + V_{\text{anc}} = 18\,000 + 34\,270{,}98 = \mathbf{52\,270{,}98\text{ kN} = 52{,}27\text{ MN}}$$
+                        Poids nécessaire du massif d'ancrage :
+                        $$w_{\text{anc}} \ge V_{\text{anc}} = \mathbf{34\,270{,}98\text{ kN} \approx 34{,}27\text{ MN}}$$</p>
+
+                        <p><strong>3.5 Analyse du Mât - Cas 2 (Chariot sur rouleaux) :</strong><br>
+                        Équilibre horizontal sur le chariot glissant : $H_{\text{anc}} = H = 45\,000\text{ kN}$.<br>
+                        Tension dans le câble d'ancrage :
+                        $$T_{AD} = \frac{H_{\text{anc}}}{\cos(45^\circ)} = \frac{45\,000}{0{,}7071} = \mathbf{63\,639{,}61\text{ kN} = 63{,}64\text{ MN}}$$
+                        Effort vertical d'ancrage : $V_{\text{anc}} = T_{AD} \sin(45^\circ) = 45\,000\text{ kN}$.<br>
+                        Moment fléchissant : $\Delta H = 0 \implies \mathbf{M_{\text{mât}} = 0\text{ MN}\cdot\text{m}}$ (Le mât travaille en compression pure).<br>
+                        Effort vertical axial dans le mât :
+                        $$N_{\text{mât}} = V_A + V_{\text{anc}} = 18\,000 + 45\,000 = \mathbf{63\,000\text{ kN} = 63{,}00\text{ MN}}$$
+                        Poids nécessaire du massif d'ancrage :
+                        $$w_{\text{anc}} \ge V_{\text{anc}} = \mathbf{45\,000\text{ kN} = 45{,}00\text{ MN}}$$</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: 2D ANIMATION & VECTOR SIMULATION -->
+        <div id="tab-sim2d" class="tab-content">
+            <div class="grid-layout">
+                <!-- Controls -->
+                <div class="card">
+                    <h2 data-i18n="title_controls">Paramètres Interactifs de la Structure</h2>
+                    
+                    <div class="control-group">
+                        <label><span data-i18n="lbl_q">Charge uniforme q (kN/m) :</span> <span id="val-q" class="val-badge">120</span></label>
+                        <input type="range" id="input-q" min="50" max="250" value="120" oninput="updateCalculations()">
+                    </div>
+
+                    <div class="control-group">
+                        <label><span data-i18n="lbl_L">Portée L (m) :</span> <span id="val-L" class="val-badge">300</span></label>
+                        <input type="range" id="input-L" min="150" max="500" value="300" oninput="updateCalculations()">
+                    </div>
+
+                    <div class="control-group">
+                        <label><span data-i18n="lbl_f">Flèche f (m) :</span> <span id="val-f" class="val-badge">30</span></label>
+                        <input type="range" id="input-f" min="10" max="60" value="30" oninput="updateCalculations()">
+                    </div>
+
+                    <div class="control-group">
+                        <label><span data-i18n="lbl_h">Hauteur du mât h (m) :</span> <span id="val-h" class="val-badge">50</span></label>
+                        <input type="range" id="input-h" min="30" max="80" value="50" oninput="updateCalculations()">
+                    </div>
+
+                    <div class="control-group">
+                        <label data-i18n="lbl_support">Type d'Appui au Sommet du Mât :</label>
+                        <select id="select-support" class="select-input" onchange="updateCalculations()">
+                            <option value="poulie" data-i18n="opt_pulley">1. Poulie sans frottement (Engendre Flexion Mât + Moment)</option>
+                            <option value="chariot" data-i18n="opt_saddle">2. Chariot sur rouleaux (Compression Pure, Moment = 0)</option>
+                        </select>
+                    </div>
+
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th data-i18n="th_param">Grandeur Physico-Mécanique</th>
+                                <th data-i18n="th_val">Valeur Calculée</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Poussée Horizontale $H$</td><td id="res-H" class="highlight-calc">-</td></tr>
+                            <tr><td>Réaction Verticale Appui $V_A$</td><td id="res-Va">-</td></tr>
+                            <tr><td>Angle d'inclinaison $\alpha$</td><td id="res-alpha">-</td></tr>
+                            <tr><td>Tension Maximale $T_{\max}$</td><td id="res-Tmax" class="highlight-calc">-</td></tr>
+                            <tr><td>Diamètre Minimal Câble $d_{\min}$</td><td id="res-dmin">-</td></tr>
+                            <tr><td>Tension Câble d'Ancrage $T_{AD}$</td><td id="res-Tanc">-</td></tr>
+                            <tr><td>Moment de Flexion Mât $M_{\text{mât}}$</td><td id="res-Mmat" class="highlight-calc">-</td></tr>
+                            <tr><td>Effort Vertical Mât $N_{\text{mât}}$</td><td id="res-Nmat">-</td></tr>
+                            <tr><td>Poids Massif Ancrage $w_{\text{anc}}$</td><td id="res-Wanc">-</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Canvas 2D Vector Visualizer -->
+                <div class="card">
+                    <h2 data-i18n="title_canvas2d">Schéma Vectoriel & Flexion Dynamique 2D</h2>
+                    <canvas id="canvas2d"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: REALISTIC 3D INTERACTIVE & DYNAMIC PHYSICAL MODEL -->
+        <div id="tab-sim3d" class="tab-content">
+            <div class="card">
+                <h2 data-i18n="title_canvas3d">Simulation 3D Hyper-Réaliste : Physique Réactive, Trafic Fluide & Vecteurs de Forces</h2>
+                <div id="container3d">
+                    <div class="overlay-info" data-i18n="overlay_3d">
+                        🎮 <strong>Contrôles 3D :</strong> Clic gauche + Glisser = Rotation | Clic droit = Translation | Molette = Zoom<br>
+                        🧪 <strong>Comportement Dynamique :</strong> Modifiez les curseurs (charge $q$, flèche $f$) pour observer la déformation du tablier, la flexion du mât, la tension des câbles d'ancrage et la disposition exacte de toutes les forces ($H, V_A, T_{\max}, T_{AD}, N_{\text{mât}}, W_{\text{anc}}$) ainsi que les angles ($\alpha, 45^\circ$).
+                    </div>
+                    
+                    <div class="legend-box">
+                        <div class="legend-item"><div class="legend-color" style="background:#38bdf8;"></div><span>Poussée Horizontale $H$</span></div>
+                        <div class="legend-item"><div class="legend-color" style="background:#4ade80;"></div><span>Tension Ancrage $T_{AD}$</span></div>
+                        <div class="legend-item"><div class="legend-color" style="background:#facc15;"></div><span>Tension Max $T_{\max}$ & Angle $\alpha$</span></div>
+                        <div class="legend-item"><div class="legend-color" style="background:#f87171;"></div><span>Effort Mât $N_{\text{mât}}$ & Moment</span></div>
+                        <div class="legend-item"><div class="legend-color" style="background:#c084fc;"></div><span>Réaction Appui $V_A$</span></div>
+                        <div class="legend-item"><div class="legend-color" style="background:#fb923c;"></div><span>Poids Ancrage $W_{\text{anc}}$</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- MULTI-LANGUAGE TRANSLATIONS ---
+        const translations = {
+            fr: {
+                app_title: "🌉 Analyse Structurale & Simulation Hyper-Réaliste 3D - Pont Suspendu",
+                tab_statement: "Énoncé & Démonstration Détaillée",
+                tab_2d: "Animation 2D & Diagrammes",
+                tab_3d: "Rendu 3D Réaliste & Physique Dynamique",
+                title_problem: "Énoncé du Problème",
+                problem_text: "Un câble de suspension d'un pont suspendu (Figure II.6) supporte une charge uniformément répartie sur l'horizontale de q = 120 kN/m sur une portée L = 300 m avec une flèche f = 30 m. Les mâts ont une hauteur h = 50 m. Le câble d'ancrage fait un angle de 45° avec l'horizontale.",
+                q1: "Tension maximale et dimensionnement : Calculer la tension maximale T_max dans le câble, l'inclinaison (α) aux appuis, ainsi que le diamètre minimal d_min du câble (σ_adm = 1000 N/mm²).",
+                q2: "Cas 1 (Poulie sans frottement) : Calculer le moment de renversement à la base du mât (M_mât), l'effort vertical (N_mât), et le poids minimal du massif d'ancrage (w_anc).",
+                q3: "Cas 2 (Chariot sur rouleaux) : Calculer la tension dans le câble d'ancrage (T_AD), le moment à la base du mât, l'effort vertical (N_mât), et le poids du massif d'ancrage (w_anc).",
+                upload_label: "Charger une image d'énoncé personnalisée :",
+                title_math: "Démonstrations & Résolution Étape par Étape",
+                demo1_title: "1. Démonstration de y(x) = (4f/L²) x (L - x)",
+                demo2_title: "2. Démonstration de y = (q_l / 2H) x²",
+                step1_title: "3. Calculs Numériques Détaillés",
+                title_controls: "Paramètres Interactifs de la Structure",
+                lbl_q: "Charge uniforme q (kN/m) :",
+                lbl_L: "Portée L (m) :",
+                lbl_f: "Flèche f (m) :",
+                lbl_h: "Hauteur du mât h (m) :",
+                lbl_support: "Type d'Appui au Sommet du Mât :",
+                opt_pulley: "1. Poulie sans frottement (Engendre Flexion Mât + Moment)",
+                opt_saddle: "2. Chariot sur rouleaux (Compression Pure, Moment = 0)",
+                th_param: "Grandeur Physico-Mécanique",
+                th_val: "Valeur Calculée",
+                title_canvas2d: "Schéma Vectoriel & Flexion Dynamique 2D",
+                title_canvas3d: "Simulation 3D Hyper-Réaliste : Physique Réactive, Trafic Fluide & Vecteurs de Forces",
+                overlay_3d: "🎮 Contrôles 3D : Clic gauche = Rotation | Clic droit = Translation | Molette = Zoom"
+            },
+            en: {
+                app_title: "🌉 Structural Analysis & High-Realism 3D Simulation - Suspension Bridge",
+                tab_statement: "Statement & Detailed Derivation",
+                tab_2d: "2D Animation & Diagrams",
+                tab_3d: "Realistic 3D Rendering & Dynamic Physics",
+                title_problem: "Problem Statement",
+                problem_text: "A suspension bridge cable supports a load uniformly distributed horizontally at q = 120 kN/m over a span L = 300 m with a sag f = 30 m. The towers have a height h = 50 m. The backstay cable angle is 45°.",
+                q1: "Max Tension & Sizing: Calculate maximum cable tension T_max, angle α at supports, and minimum cable diameter d_min (σ_adm = 1000 N/mm²).",
+                q2: "Case 1 (Frictionless Pulley): Calculate overturning moment at tower base (M_tower), vertical force (N_tower), and anchor block weight (w_anc).",
+                q3: "Case 2 (Roller Saddle): Calculate backstay tension (T_AD), bending moment at tower base, vertical force (N_tower), and required anchor weight (w_anc).",
+                upload_label: "Upload custom problem image:",
+                title_math: "Derivations & Step-by-Step Solution",
+                demo1_title: "1. Proof of y(x) = (4f/L²) x (L - x)",
+                demo2_title: "2. Proof of y = (q_l / 2H) x²",
+                step1_title: "3. Step-by-Step Numerical Calculations",
+                title_controls: "Interactive Structural Parameters",
+                lbl_q: "Uniform Load q (kN/m):",
+                lbl_L: "Span L (m):",
+                lbl_f: "Sag f (m):",
+                lbl_h: "Tower Height h (m):",
+                lbl_support: "Tower Top Support Type:",
+                opt_pulley: "1. Frictionless Pulley (Causes Tower Bending + Moment)",
+                opt_saddle: "2. Roller Saddle (Pure Compression, Moment = 0)",
+                th_param: "Physical Mechanical Quantity",
+                th_val: "Calculated Value",
+                title_canvas2d: "Vector Diagram & 2D Dynamic Bending",
+                title_canvas3d: "Hyper-Realistic 3D Simulation: Reactive Physics, Fluid Traffic & Force Vectors",
+                overlay_3d: "🎮 3D Navigation: Left Click = Rotate | Right Click = Pan | Scroll = Zoom"
+            }
+        };
+
+        function setLanguage(lang) {
+            document.querySelectorAll('.btn-lang').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    el.innerText = translations[lang][key];
+                }
+            });
+
+            if (window.MathJax && window.MathJax.typeset) {
+                window.MathJax.typeset();
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabId).classList.add('active');
+
+            if (tabId === 'sim2d') draw2D();
+            if (tabId === 'sim3d') init3D();
+        }
+
+        function loadCustomImage(event) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                const output = document.getElementById('problem-image');
+                output.src = reader.result;
+                output.style.display = 'block';
+                document.getElementById('img-fallback').style.display = 'none';
+            };
+            if(event.target.files[0]) {
+                reader.readAsDataURL(event.target.files[0]);
+            }
+        }
+
+        // --- COMPUTATIONS & GLOBAL STATE ---
+        let globalCalcData = {};
+
+        function updateCalculations() {
+            const q = parseFloat(document.getElementById('input-q').value);
+            const L = parseFloat(document.getElementById('input-L').value);
+            const f = parseFloat(document.getElementById('input-f').value);
+            const h = parseFloat(document.getElementById('input-h').value);
+            const support = document.getElementById('select-support').value;
+
+            document.getElementById('val-q').innerText = q;
+            document.getElementById('val-L').innerText = L;
+            document.getElementById('val-f').innerText = f;
+            document.getElementById('val-h').innerText = h;
+
+            const H = (q * L * L) / (8 * f);
+            const Va = (q * L) / 2;
+            const alphaRad = Math.atan(Va / H);
+            const alphaDeg = alphaRad * (180 / Math.PI);
+            const Tmax = Math.sqrt(H * H + Va * Va);
+
+            const sigmaAdm = 1000; // N/mm2
+            const Amin = (Tmax * 1000) / sigmaAdm; // mm2
+            const dmin = Math.sqrt((4 * Amin) / Math.PI);
+
+            let Tanc, Mmat, Nmat, Wanc;
+
+            if (support === 'poulie') {
+                Tanc = Tmax;
+                const Hanc = Tanc * Math.cos(Math.PI / 4);
+                const Vanc = Tanc * Math.sin(Math.PI / 4);
+                const DeltaH = H - Hanc;
+                Mmat = DeltaH * h;
+                Nmat = Va + Vanc;
+                Wanc = Vanc;
+            } else {
+                const Hanc = H;
+                Tanc = Hanc / Math.cos(Math.PI / 4);
+                const Vanc = Tanc * Math.sin(Math.PI / 4);
+                Mmat = 0;
+                Nmat = Va + Vanc;
+                Wanc = Vanc;
+            }
+
+            globalCalcData = { q, L, f, h, support, H, Va, alphaRad, alphaDeg, Tmax, dmin, Tanc, Mmat, Nmat, Wanc };
+
+            document.getElementById('res-H').innerText = (H / 1000).toFixed(2) + " MN";
+            document.getElementById('res-Va').innerText = (Va / 1000).toFixed(2) + " MN";
+            document.getElementById('res-alpha').innerText = alphaDeg.toFixed(2) + "°";
+            document.getElementById('res-Tmax').innerText = (Tmax / 1000).toFixed(2) + " MN";
+            document.getElementById('res-dmin').innerText = dmin.toFixed(2) + " mm";
+            document.getElementById('res-Tanc').innerText = (Tanc / 1000).toFixed(2) + " MN";
+            document.getElementById('res-Mmat').innerText = (Mmat / 1000).toFixed(2) + " MN·m";
+            document.getElementById('res-Nmat').innerText = (Nmat / 1000).toFixed(2) + " MN";
+            document.getElementById('res-Wanc').innerText = (Wanc / 1000).toFixed(2) + " MN";
+
+            draw2D();
+            if (threeRenderer) update3DStructure();
+        }
+
+        // --- 2D CANVAS ENGINE ---
+        let animTime2D = 0;
+
+        function draw2D() {
+            const canvas = document.getElementById('canvas2d');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+
+            const w = canvas.width;
+            const ch = canvas.height;
+
+            ctx.clearRect(0, 0, w, ch);
+
+            const { q, L, f, h, support } = globalCalcData;
+
+            const margin = 100;
+            const spanWidth = w - margin * 2;
+            const deckY = ch - 110;
+            const towerHeightPx = h * 2.2;
+            const towerTopY = deckY - towerHeightPx;
+
+            const towerAx = margin;
+            const towerBx = margin + spanWidth;
+
+            let bendOffset = (support === 'poulie') ? (q / 120) * 18 : 0;
+
+            // Soil / Base
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(towerAx - 80, deckY, towerBx - towerAx + 160, 45);
+
+            // Anchors D & E
+            ctx.fillStyle = '#64748b';
+            ctx.beginPath();
+            ctx.roundRect(towerAx - 75, deckY - 5, 35, 30, 4);
+            ctx.roundRect(towerBx + 40, deckY - 5, 35, 30, 4);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 12px sans-serif';
+            ctx.fillText('Massif D', towerAx - 85, deckY + 45);
+            ctx.fillText('Massif E', towerBx + 30, deckY + 45);
+
+            // Deck Girder
+            ctx.fillStyle = '#334155';
+            ctx.fillRect(towerAx, deckY - 8, spanWidth, 14);
+
+            // Uniform Load Arrows
+            animTime2D += 0.04;
+            ctx.strokeStyle = '#facc15';
+            ctx.fillStyle = '#facc15';
+            ctx.lineWidth = 1.5;
+            for (let x = towerAx + 15; x < towerBx; x += 25) {
+                const animY = Math.sin(animTime2D + x * 0.05) * 3;
+                drawArrow2D(ctx, x, deckY - 45 + animY, x, deckY - 10, 5);
+            }
+            ctx.font = 'bold 13px sans-serif';
+            ctx.fillText(`q = ${q} kN/m`, (towerAx + towerBx) / 2 - 35, deckY - 55);
+
+            // Towers with Dynamic Bending
+            ctx.strokeStyle = (support === 'poulie') ? '#f87171' : '#38bdf8';
+            ctx.lineWidth = 8;
+
+            ctx.beginPath();
+            ctx.moveTo(towerAx, deckY);
+            ctx.quadraticCurveTo(towerAx, towerTopY + towerHeightPx / 2, towerAx + bendOffset, towerTopY);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(towerBx, deckY);
+            ctx.quadraticCurveTo(towerBx, towerTopY + towerHeightPx / 2, towerBx - bendOffset, towerTopY);
+            ctx.stroke();
+
+            ctx.fillStyle = '#38bdf8';
+            ctx.font = 'bold 14px sans-serif';
+            ctx.fillText('Mât A', towerAx + bendOffset - 15, towerTopY - 20);
+            ctx.fillText('Mât B', towerBx - bendOffset - 15, towerTopY - 20);
+
+            // Main Cable Parabola
+            const sagPx = f * 2.0;
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 3.5;
+            ctx.beginPath();
+            ctx.moveTo(towerAx + bendOffset, towerTopY);
+            ctx.quadraticCurveTo((towerAx + towerBx) / 2, towerTopY + sagPx * 2, towerBx - bendOffset, towerTopY);
+            ctx.stroke();
+
+            // Anchor Backstay
+            ctx.strokeStyle = '#4ade80';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(towerAx + bendOffset, towerTopY);
+            ctx.lineTo(towerAx - 60, deckY + 5);
+            ctx.moveTo(towerBx - bendOffset, towerTopY);
+            ctx.lineTo(towerBx + 60, deckY + 5);
+            ctx.stroke();
+
+            // Force Vectors at Tower Top
+            const topAx = towerAx + bendOffset;
+            ctx.strokeStyle = '#38bdf8';
+            drawArrow2D(ctx, topAx, towerTopY, topAx + 65, towerTopY, 7);
+            ctx.fillText('H', topAx + 70, towerTopY + 4);
+
+            ctx.strokeStyle = '#4ade80';
+            drawArrow2D(ctx, topAx, towerTopY, topAx - 45, towerTopY + 45, 7);
+            ctx.fillText('T_AD (45°)', topAx - 75, towerTopY + 55);
+
+            if (support === 'poulie') {
+                ctx.strokeStyle = '#f87171';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(towerAx, deckY - 15, 28, Math.PI, 1.5 * Math.PI, false);
+                ctx.stroke();
+                drawArrow2D(ctx, towerAx - 28, deckY - 18, towerAx - 28, deckY - 25, 6);
+                ctx.fillStyle = '#f87171';
+                ctx.fillText('M_mât', towerAx - 85, deckY - 35);
+            }
+        }
+
+        function drawArrow2D(ctx, fromx, fromy, tox, toy, headlen) {
+            const dx = tox - fromx;
+            const dy = toy - fromy;
+            const angle = Math.atan2(dy, dx);
+            ctx.beginPath();
+            ctx.moveTo(fromx, fromy);
+            ctx.lineTo(tox, toy);
+            ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.moveTo(tox, toy);
+            ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.stroke();
+        }
+
+        // --- HIGH-REALISM 3D ENGINE WITH DYNAMIC PHYSICS, FORCES & FLUID TRAFFIC ---
+        let scene, camera, threeRenderer, controls;
+        let leftCableMesh, rightCableMesh, deckGroup3D, towerLeft3D, towerRight3D;
+        let suspendersGroup3D, vehiclesArray3D = [], forceVectorsGroup3D, labelsGroup3D;
+
+        function init3D() {
+            const container = document.getElementById('container3d');
+            if (scene || !container) return;
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x060913);
+            scene.fog = new THREE.FogExp2(0x060913, 0.0012);
+
+            camera = new THREE.PerspectiveCamera(38, container.clientWidth / container.clientHeight, 1, 3500);
+            camera.position.set(0, 130, 480);
+
+            threeRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+            threeRenderer.setSize(container.clientWidth, container.clientHeight);
+            threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            threeRenderer.shadowMap.enabled = true;
+            threeRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(threeRenderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, threeRenderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.maxPolarAngle = Math.PI / 2 - 0.01;
+
+            // Environmental Lighting
+            const ambientLight = new THREE.AmbientLight(0xdbeafe, 0.65);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xfffbeb, 1.3);
+            dirLight.position.set(250, 450, 200);
+            dirLight.castShadow = true;
+            dirLight.shadow.mapSize.width = 2048;
+            dirLight.shadow.mapSize.height = 2048;
+            dirLight.shadow.camera.near = 10;
+            dirLight.shadow.camera.far = 1200;
+            const d = 350;
+            dirLight.shadow.camera.left = -d;
+            dirLight.shadow.camera.right = d;
+            dirLight.shadow.camera.top = d;
+            dirLight.shadow.camera.bottom = -d;
+            scene.add(dirLight);
+
+            // Water Plane
+            const waterGeo = new THREE.PlaneGeometry(2500, 2500);
+            const waterMat = new THREE.MeshStandardMaterial({
+                color: 0x0e243a,
+                roughness: 0.15,
+                metalness: 0.85,
+                transparent: true,
+                opacity: 0.88
+            });
+            const water = new THREE.Mesh(waterGeo, waterMat);
+            water.rotation.x = -Math.PI / 2;
+            water.position.y = -65;
+            scene.add(water);
+
+            // Static Groups
+            suspendersGroup3D = new THREE.Group();
+            forceVectorsGroup3D = new THREE.Group();
+            labelsGroup3D = new THREE.Group();
+            scene.add(suspendersGroup3D);
+            scene.add(forceVectorsGroup3D);
+            scene.add(labelsGroup3D);
+
+            build3DInfrastructure();
+            create3DFluidTraffic();
+
+            let clock = new THREE.Clock();
+
+            function animate3D() {
+                requestAnimationFrame(animate3D);
+                const delta = clock.getDelta();
+
+                controls.update();
+                update3DTrafficMovement(delta);
+
+                // Billboard Sprite Labels to face camera
+                labelsGroup3D.children.forEach(sprite => {
+                    sprite.quaternion.copy(camera.quaternion);
+                });
+
+                threeRenderer.render(scene, camera);
+            }
+            animate3D();
+        }
+
+        function build3DInfrastructure() {
+            deckGroup3D = new THREE.Group();
+            scene.add(deckGroup3D);
+
+            const deckWidth = 32;
+            const span3D = 300 * 0.8;
+
+            // Main Deck Structure
+            const deckGeo = new THREE.BoxGeometry(span3D + 120, 4.5, deckWidth);
+            const deckMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 });
+            const deckBase = new THREE.Mesh(deckGeo, deckMat);
+            deckBase.position.y = -20;
+            deckBase.receiveShadow = true;
+            deckGroup3D.add(deckBase);
+
+            // Road Markings
+            const lineGeo = new THREE.PlaneGeometry(span3D + 120, 0.7);
+            const lineMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+            const roadLine = new THREE.Mesh(lineGeo, lineMat);
+            roadLine.rotation.x = -Math.PI / 2;
+            roadLine.position.set(0, -17.6, 0);
+            deckGroup3D.add(roadLine);
+
+            // Concrete Towers
+            towerLeft3D = create3DTower(deckWidth);
+            towerLeft3D.position.x = -span3D / 2;
+            scene.add(towerLeft3D);
+
+            towerRight3D = create3DTower(deckWidth);
+            towerRight3D.position.x = span3D / 2;
+            scene.add(towerRight3D);
+
+            // Concrete Anchor Blocks D & E
+            const blockGeo = new THREE.BoxGeometry(36, 45, deckWidth + 12);
+            const blockMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 });
+            
+            const blockD = new THREE.Mesh(blockGeo, blockMat);
+            blockD.position.set(-span3D / 2 - 130, -42, 0);
+            blockD.castShadow = true;
+            scene.add(blockD);
+
+            const blockE = new THREE.Mesh(blockGeo, blockMat);
+            blockE.position.set(span3D / 2 + 130, -42, 0);
+            blockE.castShadow = true;
+            scene.add(blockE);
+
+            update3DStructure();
+        }
+
+        function create3DTower(deckWidth) {
+            const group = new THREE.Group();
+            const pillarMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.3, metalness: 0.2 });
+
+            const towerH = 50 * 0.8;
+            const p1 = new THREE.Mesh(new THREE.BoxGeometry(9, towerH + 45, 9), pillarMat);
+            p1.position.set(0, (towerH + 45) / 2 - 60, -deckWidth / 2 - 3);
+            p1.castShadow = true;
+
+            const p2 = p1.clone();
+            p2.position.set(0, (towerH + 45) / 2 - 60, deckWidth / 2 + 3);
+
+            const cross1 = new THREE.Mesh(new THREE.BoxGeometry(9, 9, deckWidth + 15), pillarMat);
+            cross1.position.set(0, towerH - 35, 0);
+
+            const cross2 = cross1.clone();
+            cross2.position.set(0, towerH - 68, 0);
+
+            group.add(p1, p2, cross1, cross2);
+            return group;
+        }
+
+        function create3DFluidTraffic() {
+            const colors = [0xf87171, 0x38bdf8, 0x4ade80, 0xfacc15, 0xe2e8f0, 0xc084fc];
+            const deckWidth = 32;
+
+            for (let i = 0; i < 14; i++) {
+                const isTruck = Math.random() > 0.7;
+                const carGeo = isTruck ? new THREE.BoxGeometry(14, 5, 4.5) : new THREE.BoxGeometry(8, 3.2, 4);
+                const carMat = new THREE.MeshStandardMaterial({ color: colors[i % colors.length], roughness: 0.3 });
+                const car = new THREE.Mesh(carGeo, carMat);
+                
+                const dir = (i % 2 === 0) ? 1 : -1;
+                const laneZ = (dir === 1) ? 7 : -7;
+                
+                car.position.set((Math.random() - 0.5) * 320, -16, laneZ);
+                car.userData = {
+                    speed: (25 + Math.random() * 30) * dir,
+                    dir: dir,
+                    isTruck: isTruck
+                };
+                car.castShadow = true;
+                scene.add(car);
+                vehiclesArray3D.push(car);
+            }
+        }
+
+        function update3DTrafficMovement(delta) {
+            const L = globalCalcData.L || 300;
+            const span3D = L * 0.8;
+            const limit = span3D / 2 + 100;
+
+            vehiclesArray3D.forEach(v => {
+                v.position.x += v.userData.speed * delta;
+                
+                // Deck Deflection Profile Reaction under vehicle position
+                const normX = (v.position.x + span3D / 2) / span3D;
+                let flexY = 0;
+                if (normX >= 0 && normX <= 1) {
+                    const loadFactor = (globalCalcData.q || 120) / 120;
+                    flexY = -8 * loadFactor * Math.sin(normX * Math.PI);
+                }
+                v.position.y = -16.2 + flexY;
+
+                // Loop vehicles continuously for smooth fluid traffic
+                if (v.userData.dir === 1 && v.position.x > limit) {
+                    v.position.x = -limit;
+                } else if (v.userData.dir === -1 && v.position.x < -limit) {
+                    v.position.x = limit;
+                }
+            });
+        }
+
+        function update3DStructure() {
+            if (!scene) return;
+
+            const { q, L, f, h, support, H, Va, alphaDeg, Tmax, Tanc, Mmat, Nmat, Wanc } = globalCalcData;
+
+            const scale = 0.8;
+            const span3D = L * scale;
+            const towerH3D = h * scale;
+            const sag3D = f * scale;
+            const deckWidth = 32;
+
+            // Remove old dynamic meshes
+            if (leftCableMesh) scene.remove(leftCableMesh);
+            if (rightCableMesh) scene.remove(rightCableMesh);
+            
+            while (suspendersGroup3D.children.length > 0) suspendersGroup3D.remove(suspendersGroup3D.children[0]);
+            while (forceVectorsGroup3D.children.length > 0) forceVectorsGroup3D.remove(forceVectorsGroup3D.children[0]);
+            while (labelsGroup3D.children.length > 0) labelsGroup3D.remove(labelsGroup3D.children[0]);
+
+            // Reactive Deck Deflection Under Load q
+            const deckFlexion = (q / 120) * 8.0;
+            deckGroup3D.position.y = -deckFlexion * 0.4;
+
+            // Reactive Tower Bending Behavior
+            let bendX = (support === 'poulie') ? (q / 120) * 12.0 : 0;
+            towerLeft3D.rotation.z = -bendX * 0.003;
+            towerRight3D.rotation.z = bendX * 0.003;
+
+            // Generate Parabolic Main Cable Curves
+            const pointsLeft = [];
+            const pointsRight = [];
+            const numSegments = 70;
+            const startX = -span3D / 2 + bendX * 0.5;
+            const endX = span3D / 2 - bendX * 0.5;
+            const topY = towerH3D - 20;
+
+            for (let i = 0; i <= numSegments; i++) {
+                const t = i / numSegments;
+                const x = startX + t * (endX - startX);
+                const normX = (x - startX) / (endX - startX);
+                
+                // Parabola equation + physical sag deflection under q
+                const y = topY - 4 * (sag3D + deckFlexion * 0.5) * normX * (1 - normX);
+
+                const zLeft = -deckWidth / 2 - 3;
+                const zRight = deckWidth / 2 + 3;
+
+                pointsLeft.push(new THREE.Vector3(x, y, zLeft));
+                pointsRight.push(new THREE.Vector3(x, y, zRight));
+
+                // Vertical Suspenders Cable Hangers
+                if (i > 1 && i < numSegments - 1 && i % 2 === 0) {
+                    const deckYAtX = -18 - deckFlexion * Math.sin(normX * Math.PI);
+                    const suspH = y - deckYAtX;
+                    const suspGeo = new THREE.CylinderGeometry(0.3, 0.3, Math.max(0.1, suspH));
+                    const suspMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+
+                    const suspL = new THREE.Mesh(suspGeo, suspMat);
+                    suspL.position.set(x, y - suspH / 2, zLeft);
+                    
+                    const suspR = new THREE.Mesh(suspGeo, suspMat);
+                    suspR.position.set(x, y - suspH / 2, zRight);
+
+                    suspendersGroup3D.add(suspL, suspR);
+                }
+            }
+
+            // Anchor Backstay Cables (45° Angle)
+            const anchorDist = 130;
+            const anchorY = -42;
+            pointsLeft.unshift(new THREE.Vector3(-span3D / 2 - anchorDist, anchorY, -deckWidth / 2 - 3));
+            pointsLeft.push(new THREE.Vector3(span3D / 2 + anchorDist, anchorY, -deckWidth / 2 - 3));
+
+            pointsRight.unshift(new THREE.Vector3(-span3D / 2 - anchorDist, anchorY, deckWidth / 2 + 3));
+            pointsRight.push(new THREE.Vector3(span3D / 2 + anchorDist, anchorY, deckWidth / 2 + 3));
+
+            // Steel Cable Render
+            const curveLeft = new THREE.CatmullRomCurve3(pointsLeft);
+            const tubeGeoLeft = new THREE.TubeGeometry(curveLeft, 120, 1.8, 12, false);
+            const cableMat = new THREE.MeshStandardMaterial({
+                color: (support === 'poulie' && q > 180) ? 0xf87171 : 0x38bdf8,
+                metalness: 0.85,
+                roughness: 0.25
+            });
+
+            leftCableMesh = new THREE.Mesh(tubeGeoLeft, cableMat);
+            leftCableMesh.castShadow = true;
+            scene.add(leftCableMesh);
+
+            const curveRight = new THREE.CatmullRomCurve3(pointsRight);
+            const tubeGeoRight = new THREE.TubeGeometry(curveRight, 120, 1.8, 12, false);
+            rightCableMesh = new THREE.Mesh(tubeGeoRight, cableMat);
+            rightCableMesh.castShadow = true;
+            scene.add(rightCableMesh);
+
+            // --- 3D FORCE VECTORS & ANGLES VISUALIZATION ---
+            build3DForceVectorsAndLabels(startX, topY, deckWidth, anchorDist, anchorY);
+        }
+
+        function build3DForceVectorsAndLabels(towerTopX, towerTopY, deckWidth, anchorDist, anchorY) {
+            const { H, Va, alphaDeg, Tmax, Tanc, Nmat, Wanc, Mmat, support } = globalCalcData;
+
+            const posTopLeft = new THREE.Vector3(towerTopX, towerTopY, -deckWidth / 2 - 3);
+            const posBaseLeft = new THREE.Vector3(towerTopX, -20, -deckWidth / 2 - 3);
+            const posAnchorD = new THREE.Vector3(towerTopX - anchorDist, anchorY, -deckWidth / 2 - 3);
+
+            // 1. Horizontal Thrust H Vector (Cyan)
+            add3DArrow(posTopLeft, new THREE.Vector3(1, 0, 0), 45, 0x38bdf8);
+            add3DSpriteLabel(`H = ${(H/1000).toFixed(1)} MN`, new THREE.Vector3(towerTopX + 25, towerTopY + 8, -deckWidth / 2 - 3), '#38bdf8');
+
+            // 2. Vertical Reaction V_A Vector (Purple)
+            add3DArrow(posTopLeft, new THREE.Vector3(0, -1, 0), 35, 0xc084fc);
+            add3DSpriteLabel(`V_A = ${(Va/1000).toFixed(1)} MN`, new THREE.Vector3(towerTopX - 12, towerTopY - 18, -deckWidth / 2 - 3), '#c084fc');
+
+            // 3. Max Tension T_max Tangent Vector & Angle alpha (Yellow)
+            const alphaRad = globalCalcData.alphaRad;
+            const dirTmax = new THREE.Vector3(Math.cos(alphaRad), -Math.sin(alphaRad), 0).normalize();
+            add3DArrow(posTopLeft, dirTmax, 50, 0xfacc15);
+            add3DSpriteLabel(`T_max = ${(Tmax/1000).toFixed(1)} MN (α = ${alphaDeg.toFixed(1)}°)`, new THREE.Vector3(towerTopX + 30, towerTopY - 22, -deckWidth / 2 - 3), '#facc15');
+
+            // 4. Backstay Tension T_AD Vector (Green 45°)
+            const dirTanc = new THREE.Vector3(-Math.cos(Math.PI/4), -Math.sin(Math.PI/4), 0).normalize();
+            add3DArrow(posTopLeft, dirTanc, 50, 0x4ade80);
+            add3DSpriteLabel(`T_AD = ${(Tanc/1000).toFixed(1)} MN (θ = 45°)`, new THREE.Vector3(towerTopX - 35, towerTopY - 18, -deckWidth / 2 - 3), '#4ade80');
+
+            // 5. Tower Vertical Axial Force N_mât Vector (Red)
+            add3DArrow(posBaseLeft, new THREE.Vector3(0, -1, 0), 40, 0xf87171);
+            add3DSpriteLabel(`N_mât = ${(Nmat/1000).toFixed(1)} MN`, new THREE.Vector3(towerTopX + 18, -35, -deckWidth / 2 - 3), '#f87171');
+
+            // 6. Anchor Weight W_anc Vector (Orange)
+            add3DArrow(posAnchorD, new THREE.Vector3(0, -1, 0), 35, 0xfb923c);
+            add3DSpriteLabel(`W_anc ≥ ${(Wanc/1000).toFixed(1)} MN`, new THREE.Vector3(towerTopX - anchorDist, anchorY - 22, -deckWidth / 2 - 3), '#fb923c');
+
+            // 7. Bending Moment Indicator (if Poulie)
+            if (support === 'poulie') {
+                add3DSpriteLabel(`M_mât = ${(Mmat/1000).toFixed(1)} MN·m (Flexion)`, new THREE.Vector3(towerTopX, -10, -deckWidth / 2 - 3), '#f87171');
+            }
+        }
+
+        function add3DArrow(origin, dir, length, hexColor) {
+            const arrowHelper = new THREE.ArrowHelper(dir, origin, length, hexColor, 8, 5);
+            forceVectorsGroup3D.add(arrowHelper);
+        }
+
+        function add3DSpriteLabel(text, position, colorHex) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+            ctx.strokeStyle = colorHex;
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.roundRect(10, 10, 492, 108, 16);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = colorHex;
+            ctx.font = 'bold 36px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, 256, 64);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            const spriteMaterial = new THREE.SpriteMaterial({ map: texture, depthTest: false });
+            const sprite = new THREE.Sprite(spriteMaterial);
+            sprite.position.copy(position);
+            sprite.scale.set(38, 9.5, 1);
+
+            labelsGroup3D.add(sprite);
+        }
+
+        window.onload = () => {
+            updateCalculations();
+        };
+
+        window.onresize = () => {
+            draw2D();
+            if (threeRenderer && camera) {
+                const container = document.getElementById('container3d');
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                threeRenderer.setSize(container.clientWidth, container.clientHeight);
+            }
+        };
+    </script>
+</body>
+</html>

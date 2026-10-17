@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plateforme pédagogique — Dalle supportée par deux câbles paraboliques</title>
+
+<!-- =========================================================
+     CONFIGURATION DE L'IMAGE DU PROBLÈME
+     ---------------------------------------------------------
+     Placez "schema-probleme.png" dans le même dossier que ce
+     fichier HTML.
+
+     Vous pouvez aussi changer simplement cette ligne :
+       src="schema-probleme.png"
+     par un chemin local, par exemple :
+       src="C:/Users/VotreNom/Desktop/schema-probleme.png"
+
+     IMPORTANT : pour une page HTML portable, il est préférable
+     de conserver l'image dans le même dossier.
+========================================================= -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+:root{
+  --navy:#071426;
+  --navy2:#0b1c32;
+  --panel:#10263f;
+  --panel2:#0d2036;
+  --border:#29445f;
+  --text:#edf6ff;
+  --muted:#a9bdd1;
+  --cyan:#45d7ff;
+  --blue:#5c8dff;
+  --green:#37e49b;
+  --orange:#ffb84d;
+  --red:#ff5c6c;
+  --purple:#b18cff;
+  --white:#fff;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  color:var(--text);
+  font-family:Inter,Segoe UI,Arial,sans-serif;
+  background:
+    radial-gradient(circle at 15% 0%,#163b60 0%,transparent 32%),
+    radial-gradient(circle at 100% 20%,#25205a 0%,transparent 28%),
+    var(--navy);
+  line-height:1.65;
+}
+button,input{font:inherit}
+button{cursor:pointer}
+a{color:var(--cyan)}
+.container{max-width:1450px;margin:auto;padding:20px}
+
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(7,20,38,.91);
+  backdrop-filter:blur(15px);
+  border-bottom:1px solid var(--border);
+}
+.topbar-inner{
+  max-width:1450px;margin:auto;padding:12px 20px;
+  display:flex;justify-content:space-between;align-items:center;gap:15px;
+}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-icon{
+  width:44px;height:44px;border-radius:13px;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--cyan),var(--purple));
+  color:#061322;font-weight:900;font-size:21px
+}
+.brand-title{font-weight:900}
+.brand-sub{font-size:12px;color:var(--muted)}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{
+  border:1px solid var(--border);background:#112941;color:var(--text);
+  padding:9px 13px;border-radius:10px;transition:.2s
+}
+.btn:hover{transform:translateY(-1px);border-color:var(--cyan)}
+.btn.primary{background:var(--cyan);color:#061321;border-color:var(--cyan);font-weight:900}
+.btn.active{background:var(--blue);border-color:var(--blue)}
+
+.hero{
+  padding:48px 20px 35px;
+  text-align:center;
+}
+.hero .eyebrow{
+  display:inline-block;padding:5px 12px;border:1px solid #315372;
+  border-radius:99px;color:var(--cyan);font-size:12px;font-weight:900;
+  letter-spacing:.08em;text-transform:uppercase
+}
+.hero h1{
+  font-size:clamp(27px,4vw,49px);line-height:1.12;margin:16px auto 12px;max-width:1000px
+}
+.hero p{max-width:900px;margin:auto;color:var(--muted);font-size:17px}
+
+.section{
+  margin:20px 0;padding:25px;border:1px solid var(--border);
+  border-radius:20px;background:linear-gradient(180deg,rgba(16,38,63,.96),rgba(9,25,43,.96));
+  box-shadow:0 18px 55px rgba(0,0,0,.24)
+}
+.section-head{
+  display:flex;justify-content:space-between;align-items:flex-start;gap:15px;margin-bottom:18px
+}
+.section-number{
+  color:var(--cyan);font-weight:900;font-size:13px;letter-spacing:.08em;text-transform:uppercase
+}
+.section h2{margin:3px 0;font-size:25px}
+.section-intro{color:var(--muted);max-width:900px;margin:0}
+
+.grid2{display:grid;grid-template-columns:1.05fr .95fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+@media(max-width:1000px){.grid2,.grid3{grid-template-columns:1fr}}
+.card{
+  background:#091a2d;border:1px solid var(--border);border-radius:15px;padding:17px
+}
+.card h3{margin:0 0 10px;font-size:17px}
+.card p:last-child{margin-bottom:0}
+.muted{color:var(--muted)}
+
+.problem-box{
+  border-left:4px solid var(--cyan);
+  background:linear-gradient(90deg,rgba(69,215,255,.08),transparent);
+  padding:17px;border-radius:10px
+}
+.data-table{width:100%;border-collapse:collapse}
+.data-table td{padding:9px;border-bottom:1px solid #1b344d}
+.data-table td:last-child{text-align:right;font-weight:800;color:var(--cyan)}
+
+.figure{
+  background:#020a13;border:1px solid var(--border);border-radius:15px;padding:10px;text-align:center
+}
+.figure img{
+  width:100%;max-height:530px;object-fit:contain;border-radius:10px;
+  background:#fff
+}
+.caption{font-size:12px;color:var(--muted);margin-top:8px}
+
+.pill-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:13px}
+.pill{border:1px solid var(--border);border-radius:99px;padding:4px 9px;font-size:12px;background:#0a1d31}
+.pill.cyan{color:var(--cyan)}.pill.orange{color:var(--orange)}
+.pill.green{color:var(--green)}.pill.red{color:var(--red)}
+
+.concept{
+  position:relative;padding:20px;border-radius:15px;
+  background:#08192c;border:1px solid var(--border)
+}
+.concept .num{
+  width:32px;height:32px;border-radius:50%;display:grid;place-items:center;
+  background:var(--cyan);color:#061321;font-weight:900;margin-bottom:10px
+}
+.concept strong{color:var(--cyan)}
+
+.callout{
+  padding:15px;border-radius:13px;border:1px solid rgba(55,228,155,.3);
+  background:rgba(55,228,155,.07)
+}
+.warning{
+  padding:15px;border-radius:13px;border:1px solid rgba(255,184,77,.35);
+  background:rgba(255,184,77,.07);color:#ffd58d
+}
+
+.visual-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.visual-tab{
+  border:1px solid var(--border);background:#091a2d;color:var(--text);
+  padding:9px 13px;border-radius:10px
+}
+.visual-tab.active{background:var(--blue);border-color:var(--blue)}
+.viewer{
+  position:relative;height:620px;border:1px solid var(--border);
+  border-radius:15px;overflow:hidden;background:#02070d
+}
+.viewer canvas{display:block;width:100%;height:100%}
+.viewer-overlay{
+  position:absolute;left:13px;top:13px;z-index:5;
+  padding:10px 12px;background:rgba(3,12,23,.82);border:1px solid #29445f;
+  border-radius:11px;font-size:12px
+}
+.legend{
+  position:absolute;right:13px;top:13px;z-index:5;
+  background:rgba(3,12,23,.86);border:1px solid #29445f;border-radius:11px;padding:10px;
+  font-size:12px
+}
+.legend-row{display:flex;align-items:center;gap:7px;margin:4px 0}
+.legend-dot{width:10px;height:10px;border-radius:50%}
+.red{background:var(--red)}.green{background:var(--green)}
+.blue{background:var(--cyan)}.orange{background:var(--orange)}
+
+.viewer-controls{
+  display:flex;gap:8px;flex-wrap:wrap;margin-top:12px
+}
+.control-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px
+}
+@media(max-width:800px){.control-grid{grid-template-columns:1fr}}
+.control{
+  padding:12px;background:#08192c;border:1px solid var(--border);border-radius:12px
+}
+.control label{display:flex;justify-content:space-between;color:var(--muted);font-size:12px}
+.control b{color:var(--cyan)}
+input[type=range]{width:100%;accent-color:var(--cyan)}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+@media(max-width:800px){.two-col{grid-template-columns:1fr}}
+
+.step{
+  padding:18px;margin-bottom:12px;border-radius:14px;background:#08192c;
+  border:1px solid var(--border);border-left:4px solid var(--cyan)
+}
+.step h3{margin:0 0 7px;color:var(--cyan);font-size:17px}
+.eq{
+  background:#040c16;border:1px solid #152b42;border-radius:10px;
+  padding:11px 13px;margin:10px 0;overflow:auto
+}
+.answer{
+  padding:20px;border-radius:15px;
+  background:linear-gradient(135deg,rgba(55,228,155,.12),rgba(69,215,255,.07));
+  border:1px solid rgba(55,228,155,.35)
+}
+.answer .big{font-size:32px;color:var(--green);font-weight:900}
+.answer small{color:var(--muted)}
+
+.method{
+  border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:15px
+}
+.method-title{
+  padding:14px 17px;background:#0b2036;font-weight:900
+}
+.method-title span{color:var(--cyan)}
+.method-body{padding:17px}
+
+.summary{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px
+}
+@media(max-width:900px){.summary{grid-template-columns:1fr 1fr}}
+@media(max-width:550px){.summary{grid-template-columns:1fr}}
+.kpi{padding:14px;border:1px solid var(--border);background:#08192c;border-radius:13px}
+.kpi small{display:block;color:var(--muted)}
+.kpi b{display:block;font-size:22px;margin-top:3px}
+
+.lang-hidden{display:none!important}
+footer{text-align:center;color:var(--muted);padding:35px 15px}
+
+#toast{
+ position:fixed;right:20px;bottom:20px;z-index:999;display:none;
+ background:#132b44;border:1px solid var(--cyan);padding:12px 15px;border-radius:12px
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-icon">∑</div>
+      <div>
+        <div class="brand-title" data-fr="Mécanique des structures — Câbles" data-en="Structural Mechanics — Cables">Mécanique des structures — Câbles</div>
+        <div class="brand-sub" data-fr="Plateforme interactive de compréhension et de résolution" data-en="Interactive learning and problem-solving platform">Plateforme interactive de compréhension et de résolution</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="btn" onclick="scrollToId('problem')" data-fr="Énoncé" data-en="Problem">Énoncé</button>
+      <button class="btn" onclick="scrollToId('animation')" data-fr="Animation" data-en="Animation">Animation</button>
+      <button class="btn" onclick="scrollToId('solution')" data-fr="Solution" data-en="Solution">Solution</button>
+      <button class="btn primary" id="langBtn" onclick="toggleLanguage()">EN</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<section class="hero">
+  <div class="eyebrow" data-fr="Apprendre → visualiser → calculer → vérifier" data-en="Learn → visualize → calculate → verify">Apprendre → visualiser → calculer → vérifier</div>
+  <h1 data-fr="Dalle en béton armé supportée par deux câbles paraboliques"
+      data-en="Reinforced-concrete slab supported by two parabolic cables">
+      Dalle en béton armé supportée par deux câbles paraboliques
+  </h1>
+  <p data-fr="Une plateforme conçue pour que l'étudiant comprenne d'abord le phénomène physique, observe le comportement de la structure en 2D et 3D, puis réalise la résolution complète."
+     data-en="A platform designed so that the student first understands the physical phenomenon, observes the structure in 2D and 3D, and then performs the complete solution.">
+     Une plateforme conçue pour que l'étudiant comprenne d'abord le phénomène physique, observe le comportement de la structure en 2D et 3D, puis réalise la résolution complète.
+  </p>
+</section>
+
+<!-- =========================================================
+     01 — ENONCE
+========================================================= -->
+<section class="section" id="problem">
+  <div class="section-head">
+    <div>
+      <div class="section-number">01 — <span data-fr="Comprendre le problème" data-en="Understand the problem">Comprendre le problème</span></div>
+      <h2 data-fr="Énoncé et figure de référence" data-en="Problem statement and reference figure">Énoncé et figure de référence</h2>
+      <p class="section-intro" data-fr="Avant tout calcul, l'étudiant identifie la géométrie, les appuis, les câbles, les suspentes, la dalle et le rôle de la tension admissible."
+         data-en="Before any calculation, the student identifies the geometry, supports, cables, hangers, slab and the meaning of the allowable tension.">
+        Avant tout calcul, l'étudiant identifie la géométrie, les appuis, les câbles, les suspentes, la dalle et le rôle de la tension admissible.
+      </p>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div>
+      <div class="problem-box">
+        <b data-fr="Énoncé :" data-en="Problem statement:">Énoncé :</b><br>
+        <span data-fr="Une dalle en béton armé de dimensions 3,35 × 18,30 m est supportée par deux câbles paraboliques en acier. La tension admissible dans chaque câble est de 220 kN. On néglige le poids des câbles et des suspentes."
+              data-en="A reinforced-concrete slab measuring 3.35 × 18.30 m is supported by two parabolic steel cables. The allowable tension in each cable is 220 kN. The weight of the cables and hangers is neglected.">
+          Une dalle en béton armé de dimensions <b>3,35 × 18,30 m</b> est supportée par deux câbles paraboliques en acier.
+          La tension admissible dans <b>chaque câble</b> est de <b>220 kN</b>.
+          On néglige le poids des câbles et des suspentes.
+        </span>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <h3 data-fr="Données à lire sur la figure" data-en="Data read from the figure">Données à lire sur la figure</h3>
+        <table class="data-table">
+          <tr><td>Portée \(L\)</td><td>18,30 m</td></tr>
+          <tr><td>Demi-portée \(a=L/2\)</td><td>9,15 m</td></tr>
+          <tr><td>Flèche \(f\)</td><td>3,65 m</td></tr>
+          <tr><td>Largeur de la dalle \(B\)</td><td>3,35 m</td></tr>
+          <tr><td>Nombre de câbles</td><td>2</td></tr>
+          <tr><td>Tension admissible / câble</td><td>220 kN</td></tr>
+        </table>
+      </div>
+
+      <div class="pill-row">
+        <span class="pill cyan">L = 18,30 m</span>
+        <span class="pill cyan">f = 3,65 m</span>
+        <span class="pill green">2 câbles</span>
+        <span class="pill red">220 kN / câble</span>
+      </div>
+    </div>
+
+    <div class="figure">
+      <!-- ================= EMPLACEMENT DE LA PHOTO =================
+           Image fournie par l'utilisateur :
+           schema-probleme.png
+           Si vous changez le nom, modifiez uniquement src="..."
+      =============================================================== -->
+      <img src="schema-probleme.png" alt="Figure de l'énoncé : dalle supportée par deux câbles paraboliques"
+           onerror="this.style.display='none';document.getElementById('imageFallback').style.display='block'">
+      <div id="imageFallback" style="display:none;padding:60px 15px;color:#a9bdd1">
+        <b>Image non trouvée.</b><br>
+        Placez <code>schema-probleme.png</code> dans le même dossier que ce fichier HTML.
+      </div>
+      <div class="caption" data-fr="Figure originale de l'énoncé — vue en élévation et vue en plan."
+           data-en="Original problem figure — elevation view and plan view.">
+        Figure originale de l'énoncé — vue en élévation et vue en plan.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     02 — PHENOMENE
+========================================================= -->
+<section class="section">
+  <div class="section-head">
+    <div>
+      <div class="section-number">02 — <span data-fr="Comprendre le phénomène" data-en="Understand the phenomenon">Comprendre le phénomène</span></div>
+      <h2 data-fr="Que se passe-t-il physiquement ?" data-en="What happens physically?">Que se passe-t-il physiquement ?</h2>
+      <p class="section-intro" data-fr="Cette étape est volontairement placée avant les équations : l'étudiant doit comprendre le cheminement de la charge."
+         data-en="This step is intentionally placed before the equations: the student must understand the load path.">
+        Cette étape est volontairement placée avant les équations : l'étudiant doit comprendre le cheminement de la charge.
+      </p>
+    </div>
+  </div>
+
+  <div class="grid3">
+    <div class="concept">
+      <div class="num">1</div>
+      <h3 data-fr="La dalle reçoit la charge" data-en="The slab receives the load">La dalle reçoit la charge</h3>
+      <p data-fr="La charge de service agit verticalement vers le bas sur la surface de la dalle."
+         data-en="The service load acts vertically downward over the slab surface.">
+        La charge de service agit verticalement vers le bas sur la surface de la dalle.
+      </p>
+      <div class="eq">$$q\quad [kN/m^2]$$</div>
+    </div>
+
+    <div class="concept">
+      <div class="num">2</div>
+      <h3 data-fr="La charge passe aux suspentes" data-en="Load is transferred to hangers">La charge passe aux suspentes</h3>
+      <p data-fr="Les suspentes transmettent progressivement la charge verticale de la dalle vers les deux câbles."
+         data-en="The hangers progressively transfer the vertical load from the slab to the two cables.">
+        Les suspentes transmettent progressivement la charge verticale de la dalle vers les deux câbles.
+      </p>
+      <div class="eq">$$q\rightarrow\text{suspentes}\rightarrow\text{câbles}$$</div>
+    </div>
+
+    <div class="concept">
+      <div class="num">3</div>
+      <h3 data-fr="Le câble travaille en traction" data-en="The cable works in tension">Le câble travaille en traction</h3>
+      <p data-fr="La tension T est inclinée. Elle possède donc une composante horizontale H et une composante verticale V."
+         data-en="The tension T is inclined. It therefore has a horizontal component H and a vertical component V.">
+        La tension \(T\) est inclinée. Elle possède donc une composante horizontale \(H\) et une composante verticale \(V\).
+      </p>
+      <div class="eq">$$T^2=H^2+V^2$$</div>
+    </div>
+  </div>
+
+  <div class="callout" style="margin-top:15px">
+    <b data-fr="Idée essentielle :" data-en="Key idea:">Idée essentielle :</b>
+    <span data-fr=" un câble ne travaille pratiquement qu'en traction. La partie verticale de sa tension équilibre la charge, tandis que la partie horizontale est liée à la flèche du câble."
+          data-en=" a cable works essentially in tension. The vertical part of its tension balances the load, while the horizontal part is related to the cable sag.">
+       un câble ne travaille pratiquement qu'en traction. La partie verticale de sa tension équilibre la charge, tandis que la partie horizontale est liée à la flèche du câble.
+    </span>
+  </div>
+</section>
+
+<!-- =========================================================
+     03 — ANIMATION
+========================================================= -->
+<section class="section" id="animation">
+  <div class="section-head">
+    <div>
+      <div class="section-number">03 — <span data-fr="Visualiser avant de calculer" data-en="Visualize before calculating">Visualiser avant de calculer</span></div>
+      <h2 data-fr="Laboratoire 2D / 3D interactif" data-en="Interactive 2D / 3D laboratory">Laboratoire 2D / 3D interactif</h2>
+      <p class="section-intro" data-fr="L'étudiant peut observer la dalle, les deux câbles, les suspentes et les vecteurs d'efforts avant de commencer la résolution."
+         data-en="The student can observe the slab, both cables, hangers and force vectors before starting the solution.">
+        L'étudiant peut observer la dalle, les deux câbles, les suspentes et les vecteurs d'efforts avant de commencer la résolution.
+      </p>
+    </div>
+  </div>
+
+  <div class="visual-tabs">
+    <button class="visual-tab active" id="tab3d" onclick="setView('3d')" data-fr="◈ 3D structure" data-en="◈ 3D structure">◈ 3D structure</button>
+    <button class="visual-tab" id="tabElevation" onclick="setView('elevation')" data-fr="▱ 2D élévation" data-en="▱ 2D elevation">▱ 2D élévation</button>
+    <button class="visual-tab" id="tabPlan" onclick="setView('plan')" data-fr="▭ 2D plan" data-en="▭ 2D plan">▭ 2D plan</button>
+  </div>
+
+  <div class="viewer" id="viewer3d">
+    <div class="viewer-overlay">
+      <b data-fr="MODE 3D" data-en="3D MODE">MODE 3D</b><br>
+      <span data-fr="Souris : rotation • molette : zoom • clic droit : déplacement"
+            data-en="Mouse: rotate • wheel: zoom • right click: pan">
+        Souris : rotation • molette : zoom • clic droit : déplacement
+      </span>
+    </div>
+    <div class="legend">
+      <div class="legend-row"><span class="legend-dot red"></span> T — <span data-fr="tension" data-en="tension">tension</span></div>
+      <div class="legend-row"><span class="legend-dot green"></span> V — <span data-fr="verticale" data-en="vertical">verticale</span></div>
+      <div class="legend-row"><span class="legend-dot blue"></span> H — <span data-fr="horizontale" data-en="horizontal">horizontale</span></div>
+      <div class="legend-row"><span class="legend-dot orange"></span> q — <span data-fr="charge" data-en="load">charge</span></div>
+    </div>
+  </div>
+
+  <canvas id="canvas2d" class="hidden" style="width:100%;height:620px;border:1px solid var(--border);border-radius:15px;background:#02070d"></canvas>
+
+  <div class="viewer-controls">
+    <button class="btn primary" id="animationBtn" onclick="toggleAnimation()" data-fr="⏸ Pause animation" data-en="⏸ Pause animation">⏸ Pause animation</button>
+    <button class="btn" onclick="resetCamera()" data-fr="↺ Vue initiale" data-en="↺ Reset view">↺ Vue initiale</button>
+    <button class="btn" id="forcesBtn" onclick="toggleForces()" data-fr="Forces : ON" data-en="Forces: ON">Forces : ON</button>
+    <button class="btn" id="loadsBtn" onclick="toggleLoads()" data-fr="Charge q : ON" data-en="Load q: ON">Charge q : ON</button>
+    <button class="btn" onclick="focusForces()" data-fr="⚡ Voir les forces" data-en="⚡ Focus on forces">⚡ Voir les forces</button>
+  </div>
+
+  <div class="control-grid">
+    <div class="control">
+      <label><span data-fr="Portée L" data-en="Span L">Portée L</span><b id="Lout">18,30 m</b></label>
+      <input id="Lrange" type="range" min="12" max="24" step=".1" value="18.3">
+    </div>
+    <div class="control">
+      <label><span data-fr="Flèche f" data-en="Sag f">Flèche f</span><b id="fout">3,65 m</b></label>
+      <input id="frange" type="range" min="1" max="7" step=".05" value="3.65">
+    </div>
+    <div class="control">
+      <label><span data-fr="T admissible / câble" data-en="Allowable T / cable">T admissible / câble</span><b id="Tout">220 kN</b></label>
+      <input id="Trange" type="range" min="100" max="350" step="5" value="220">
+    </div>
+  </div>
+
+  <div class="summary" style="margin-top:12px">
+    <div class="kpi"><small>H</small><b id="Hout">172,0 kN</b></div>
+    <div class="kpi"><small>V</small><b id="Vout">137,2 kN</b></div>
+    <div class="kpi"><small>P total</small><b id="Pout">548,8 kN</b></div>
+    <div class="kpi"><small>q admissible</small><b id="qout">913 kg/m²</b></div>
+  </div>
+</section>
+
+<!-- =========================================================
+     04 — TRAVAIL DEMANDE
+========================================================= -->
+<section class="section">
+  <div class="section-head">
+    <div>
+      <div class="section-number">04 — <span data-fr="Travail demandé" data-en="Required work">Travail demandé</span></div>
+      <h2 data-fr="Ce que l'étudiant doit déterminer" data-en="What the student must determine">Ce que l'étudiant doit déterminer</h2>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <h3>① <span data-fr="Déterminer l'angle du câble à l'appui" data-en="Determine the cable angle at the support">Déterminer l'angle du câble à l'appui</span></h3>
+      <div class="eq">$$\theta=?$$</div>
+    </div>
+    <div class="card">
+      <h3>② <span data-fr="Déterminer H et V pour un câble" data-en="Determine H and V for one cable">Déterminer H et V pour un câble</span></h3>
+      <div class="eq">$$H=?,\qquad V=?$$</div>
+    </div>
+    <div class="card">
+      <h3>③ <span data-fr="Déterminer la charge admissible" data-en="Determine the allowable load">Déterminer la charge admissible</span></h3>
+      <div class="eq">$$q=?\;[kN/m^2]$$</div>
+    </div>
+    <div class="card">
+      <h3>④ <span data-fr="Convertir en kg/m² et choisir la réponse" data-en="Convert to kg/m² and choose the answer">Convertir en kg/m² et choisir la réponse</span></h3>
+      <div class="eq">$$q=?\;[kg/m^2]$$</div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     05 — SOLUTION
+========================================================= -->
+<section class="section" id="solution">
+  <div class="section-head">
+    <div>
+      <div class="section-number">05 — <span data-fr="Résolution complète" data-en="Complete solution">Résolution complète</span></div>
+      <h2 data-fr="Deux méthodes indépendantes" data-en="Two independent methods">Deux méthodes indépendantes</h2>
+      <p class="section-intro" data-fr="Les deux méthodes aboutissent au même résultat. La première est très intuitive ; la seconde montre directement l'équation de la parabole."
+         data-en="Both methods lead to the same result. The first is very intuitive; the second directly uses the parabolic equation.">
+        Les deux méthodes aboutissent au même résultat. La première est très intuitive ; la seconde montre directement l'équation de la parabole.
+      </p>
+    </div>
+  </div>
+
+  <!-- METHOD 1 -->
+  <div class="method">
+    <div class="method-title">MÉTHODE 1 — <span data-fr="Géométrie + décomposition de la tension" data-en="Geometry + tension decomposition">Géométrie + décomposition de la tension</span></div>
+    <div class="method-body">
+
+      <div class="step">
+        <h3>1.1 — <span data-fr="Demi-portée" data-en="Half-span">Demi-portée</span></h3>
+        <p data-fr="La figure est symétrique. On travaille sur la moitié du câble."
+           data-en="The figure is symmetric. We work on half of the cable.">
+          La figure est symétrique. On travaille sur la moitié du câble.
+        </p>
+        <div class="eq">$$a=\frac{L}{2}=\frac{18,30}{2}=\boxed{9,15\;m}$$</div>
+      </div>
+
+      <div class="step">
+        <h3>1.2 — <span data-fr="Angle du câble à l'appui" data-en="Cable angle at the support">Angle du câble à l'appui</span></h3>
+        <p data-fr="Pour une parabole de flèche f et de demi-portée a, la pente au support vaut 2f/a."
+           data-en="For a parabola with sag f and half-span a, the slope at the support is 2f/a.">
+          Pour une parabole de flèche \(f\) et de demi-portée \(a\), la pente au support vaut \(2f/a\).
+        </p>
+        <div class="eq">$$\tan\theta=\frac{2f}{a}$$</div>
+        <div class="eq">$$\tan\theta=\frac{2(3,65)}{9,15}=0,7978$$</div>
+        <div class="eq">$$\boxed{\theta\approx38,58^\circ}$$</div>
+      </div>
+
+      <div class="step">
+        <h3>1.3 — <span data-fr="Décomposer la tension" data-en="Resolve the tension">Décomposer la tension</span></h3>
+        <p data-fr="L'énoncé donne 220 kN dans chaque câble. Nous étudions donc un seul câble."
+           data-en="The statement gives 220 kN in each cable. We therefore analyze one cable.">
+          L'énoncé donne <b>220 kN dans chaque câble</b>. Nous étudions donc un seul câble.
+        </p>
+        <div class="eq">$$T=220\;kN$$</div>
+        <div class="eq">$$H=T\cos\theta$$</div>
+        <div class="eq">$$V=T\sin\theta$$</div>
+        <div class="eq">$$H=220\cos(38,58^\circ)\approx\boxed{171,97\;kN}$$</div>
+        <div class="eq">$$V=220\sin(38,58^\circ)\approx\boxed{137,20\;kN}$$</div>
+      </div>
+
+      <div class="step">
+        <h3>1.4 — <span data-fr="Pourquoi il faut quatre composantes V ?" data-en="Why are there four V components?">Pourquoi il faut quatre composantes V ?</span></h3>
+        <p data-fr="Il y a 2 câbles. Chaque câble possède deux extrémités. À chaque extrémité apparaît une composante verticale V."
+           data-en="There are 2 cables. Each cable has two ends. A vertical component V appears at each end.">
+          Il y a <b>2 câbles</b>. Chaque câble possède <b>deux extrémités</b>. À chaque extrémité apparaît une composante verticale \(V\).
+        </p>
+        <div class="eq">$$P_{total}=4V$$</div>
+        <div class="eq">$$P_{total}=4(137,20)=\boxed{548,81\;kN}$$</div>
+        <div class="warning">
+          <b data-fr="Attention :" data-en="Important:">Attention :</b>
+          <span data-fr=" 440 kN n'est pas la tension d'un câble. C'est seulement 2×220 kN, la somme des tensions admissibles des deux câbles. Pour l'équilibre vertical, on utilise les composantes V."
+                data-en=" 440 kN is not the tension in one cable. It is only 2×220 kN, the sum of the allowable tensions of both cables. For vertical equilibrium, we use the V components.">
+            440 kN n'est pas la tension d'un câble. C'est seulement \(2\times220\) kN, la somme des tensions admissibles des deux câbles. Pour l'équilibre vertical, on utilise les composantes \(V\).
+          </span>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>1.5 — <span data-fr="Surface de la dalle" data-en="Slab area">Surface de la dalle</span></h3>
+        <div class="eq">$$A=3,35\times18,30=\boxed{61,305\;m^2}$$</div>
+      </div>
+
+      <div class="step">
+        <h3>1.6 — <span data-fr="Charge surfacique admissible" data-en="Allowable surface load">Charge surfacique admissible</span></h3>
+        <div class="eq">$$q=\frac{P_{total}}{A}=\frac{548,81}{61,305}$$</div>
+        <div class="eq">$$\boxed{q\approx8,952\;kN/m^2}$$</div>
+      </div>
+
+      <div class="step">
+        <h3>1.7 — <span data-fr="Conversion en kg/m²" data-en="Conversion to kg/m²">Conversion en kg/m²</span></h3>
+        <p data-fr="On utilise 1 kN = 1000 N et g = 9,81 m/s²."
+           data-en="We use 1 kN = 1000 N and g = 9.81 m/s².">
+          On utilise \(1\,kN=1000\,N\) et \(g=9,81\,m/s^2\).
+        </p>
+        <div class="eq">$$q=\frac{8,952\times1000}{9,81}\approx\boxed{913\;kg/m^2}$$</div>
+      </div>
+
+      <div class="answer">
+        <small data-fr="Résultat de la méthode 1" data-en="Result of method 1">Résultat de la méthode 1</small>
+        <div class="big">q ≈ 913 kg/m²</div>
+        <span data-fr="Valeur obtenue directement à partir des dimensions et de T = 220 kN par câble."
+              data-en="Value obtained directly from the dimensions and T = 220 kN per cable.">
+          Valeur obtenue directement à partir des dimensions et de \(T=220\,kN\) par câble.
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- METHOD 2 -->
+  <div class="method">
+    <div class="method-title">MÉTHODE 2 — <span data-fr="Équation de la parabole + équilibre" data-en="Parabolic equation + equilibrium">Équation de la parabole + équilibre</span></div>
+    <div class="method-body">
+
+      <div class="step">
+        <h3>2.1 — <span data-fr="Équation du câble" data-en="Cable equation">Équation du câble</span></h3>
+        <p data-fr="Prenons l'origine au point le plus bas du câble. Pour une charge uniformément répartie, le câble prend une forme parabolique."
+           data-en="Take the origin at the lowest point of the cable. Under uniformly distributed loading, the cable takes a parabolic shape.">
+          Prenons l'origine au point le plus bas du câble. Pour une charge uniformément répartie, le câble prend une forme parabolique.
+        </p>
+        <div class="eq">$$y=\frac{q_l}{2H}x^2$$</div>
+        <p data-fr="À l'appui : x = L/2 et y = f."
+           data-en="At the support: x = L/2 and y = f.">
+          À l'appui : \(x=L/2\) et \(y=f\).
+        </p>
+      </div>
+
+      <div class="step">
+        <h3>2.2 — <span data-fr="Démonstration de la relation H = qₗL²/(8f)" data-en="Derivation of H = qₗL²/(8f)">Démonstration de la relation \(H=q_lL^2/(8f)\)</span></h3>
+        <div class="eq">$$f=\frac{q_l}{2H}\left(\frac{L}{2}\right)^2$$</div>
+        <div class="eq">$$f=\frac{q_lL^2}{8H}$$</div>
+        <div class="eq">$$\boxed{H=\frac{q_lL^2}{8f}}$$</div>
+      </div>
+
+      <div class="step">
+        <h3>2.3 — <span data-fr="Équilibre vertical de la demi-portée" data-en="Vertical equilibrium of half the span">Équilibre vertical de la demi-portée</span></h3>
+        <p data-fr="La charge sur une demi-portée vaut qₗL/2. Elle est équilibrée par V."
+           data-en="The load on half the span is qₗL/2. It is balanced by V.">
+          La charge sur une demi-portée vaut \(q_lL/2\). Elle est équilibrée par \(V\).
+        </p>
+        <div class="eq">$$V=\frac{q_lL}{2}$$</div>
+        <div class="eq">$$T^2=H^2+V^2$$</div>
+      </div>
+
+      <div class="step">
+        <h3>2.4 — <span data-fr="Introduire T = 220 kN" data-en="Introduce T = 220 kN">Introduire \(T=220\,kN\)</span></h3>
+        <p data-fr="On remplace H et V par leurs expressions en fonction de qₗ."
+           data-en="Replace H and V by their expressions in terms of qₗ.">
+          On remplace \(H\) et \(V\) par leurs expressions en fonction de \(q_l\).
+        </p>
+        <div class="eq">$$220^2=\left(\frac{q_lL^2}{8f}\right)^2+\left(\frac{q_lL}{2}\right)^2$$</div>
+        <div class="eq">$$q_l=
+\frac{220}{
+\sqrt{\left(\frac{18,30^2}{8(3,65)}\right)^2+
+\left(\frac{18,30}{2}\right)^2
+}}
+\approx\boxed{15,00\;kN/m}$$</div>
+      </div>
+
+      <div class="step">
+        <h3>2.5 — <span data-fr="Deux câbles et largeur tributaire" data-en="Two cables and tributary width">Deux câbles et largeur tributaire</span></h3>
+        <p data-fr="Les deux câbles se partagent la largeur de la dalle. Chaque câble reprend une bande de largeur 3,35/2."
+           data-en="The two cables share the slab width. Each cable carries a tributary strip of width 3.35/2.">
+          Les deux câbles se partagent la largeur de la dalle. Chaque câble reprend une bande de largeur \(3,35/2\).
+        </p>
+        <div class="eq">$$b_t=\frac{3,35}{2}=1,675\;m$$</div>
+        <div class="eq">$$q_l=q\,b_t$$</div>
+        <div class="eq">$$q=\frac{15,00}{1,675}\approx\boxed{8,96\;kN/m^2}$$</div>
+      </div>
+
+      <div class="step">
+        <h3>2.6 — <span data-fr="Conversion finale" data-en="Final conversion">Conversion finale</span></h3>
+        <div class="eq">$$q\approx8,96\;kN/m^2$$</div>
+        <div class="eq">$$q\approx\frac{8,96\times1000}{9,81}
+\approx\boxed{913\;kg/m^2}$$</div>
+      </div>
+
+      <div class="answer">
+        <small data-fr="Résultat de la méthode 2" data-en="Result of method 2">Résultat de la méthode 2</small>
+        <div class="big">q ≈ 913 kg/m²</div>
+        <span data-fr="La deuxième méthode confirme la première."
+              data-en="The second method confirms the first.">
+          La deuxième méthode confirme la première.
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="warning">
+    <b data-fr="Remarque sur le QCM :" data-en="Remark about the multiple-choice answers:">Remarque sur le QCM :</b>
+    <span data-fr="avec les données visibles sur votre figure (L = 18,30 m, f = 3,65 m, T = 220 kN par câble), le calcul rigoureux donne environ 913 kg/m². La proposition 928 kg/m² est proche mais n'est pas exactement obtenue avec ces valeurs. Il faut donc vérifier l'arrondi ou une donnée de la version originale du sujet."
+          data-en="with the data visible in your figure (L = 18.30 m, f = 3.65 m, T = 220 kN per cable), the rigorous calculation gives about 913 kg/m². The 928 kg/m² option is close but is not obtained exactly with these values. Therefore, check the rounding or a datum in the original version of the problem.">
+      avec les données visibles sur votre figure (\(L=18,30\,m\), \(f=3,65\,m\), \(T=220\,kN\) par câble), le calcul rigoureux donne environ \(913\,kg/m^2\).
+      La proposition \(928\,kg/m^2\) est proche mais n'est pas exactement obtenue avec ces valeurs.
+      Il faut donc vérifier l'arrondi ou une donnée de la version originale du sujet.
+    </span>
+  </div>
+</section>
+
+<!-- =========================================================
+     06 — SYNTHESE
+========================================================= -->
+<section class="section">
+  <div class="section-head">
+    <div>
+      <div class="section-number">06 — <span data-fr="Synthèse pour l'étudiant" data-en="Student summary">Synthèse pour l'étudiant</span></div>
+      <h2 data-fr="La chaîne logique à retenir" data-en="The logical chain to remember">La chaîne logique à retenir</h2>
+    </div>
+  </div>
+
+  <div class="summary">
+    <div class="kpi"><small>① Géométrie</small><b>θ ≈ 38,58°</b></div>
+    <div class="kpi"><small>② Un câble</small><b>T = 220 kN</b></div>
+    <div class="kpi"><small>③ Décomposition</small><b>H ≈ 172 kN<br>V ≈ 137 kN</b></div>
+    <div class="kpi"><small>④ Charge</small><b>q ≈ 913 kg/m²</b></div>
+  </div>
+
+  <div class="callout" style="margin-top:15px">
+    <b data-fr="Réflexe d'examen :" data-en="Exam reflex:">Réflexe d'examen :</b>
+    <span data-fr=" ne jamais utiliser 440 kN comme tension dans un seul câble. Lire précisément « dans chaque câble » : T = 220 kN par câble, puis utiliser les deux câbles dans l'équilibre global."
+          data-en=" never use 440 kN as the tension in one cable. Read carefully “in each cable”: T = 220 kN per cable, then use both cables in the global equilibrium.">
+      ne jamais utiliser 440 kN comme tension dans un seul câble. Lire précisément « dans chaque câble » :
+      \(T=220\,kN\) par câble, puis utiliser les deux câbles dans l'équilibre global.
+    </span>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <span data-fr="Plateforme pédagogique — Mécanique des Structures • Câbles paraboliques"
+        data-en="Educational platform — Structural Mechanics • Parabolic cables">
+    Plateforme pédagogique — Mécanique des Structures • Câbles paraboliques
+  </span>
+</footer>
+
+<div id="toast"></div>
+
+<script>
+/* =========================================================
+   DONNEES
+========================================================= */
+let L=18.30, W=3.35, f=3.65, T=220;
+let currentView='3d';
+let running=true, showForces=true, showLoads=true;
+let scene,camera,renderer,controls;
+let structureGroup,forceGroup,loadGroup;
+let clock=0;
+let isEnglish=false;
+
+/* =========================================================
+   CALCULS
+========================================================= */
+function calc(){
+  const a=L/2;
+  const theta=Math.atan(2*f/a);
+  const H=T*Math.cos(theta);
+  const V=T*Math.sin(theta);
+  const P=4*V;
+  const A=L*W;
+  const qkN=P/A;
+  const qkg=qkN*1000/9.81;
+  return {a,theta,H,V,P,A,qkN,qkg};
+}
+
+function updateNumbers(){
+  const c=calc();
+  Lout.textContent=L.toFixed(2)+' m';
+  fout.textContent=f.toFixed(2)+' m';
+  Tout.textContent=T.toFixed(0)+' kN';
+  Hout.textContent=c.H.toFixed(1)+' kN';
+  Vout.textContent=c.V.toFixed(1)+' kN';
+  Pout.textContent=c.P.toFixed(1)+' kN';
+  qout.textContent=c.qkg.toFixed(0)+' kg/m²';
+  if(window.MathJax) MathJax.typesetPromise();
+}
+
+/* =========================================================
+   THREE.JS
+========================================================= */
+function mat(color,metal=0,rough=.55){
+  return new THREE.MeshStandardMaterial({
+    color, metalness:metal, roughness:rough
+  });
+}
+
+function clearGroup(g){
+  while(g && g.children.length) g.remove(g.children[0]);
+}
+
+function textSprite(text){
+  const canvas=document.createElement('canvas');
+  const ctx=canvas.getContext('2d');
+  canvas.width=600;canvas.height=120;
+  ctx.font='bold 34px Segoe UI';
+  ctx.fillStyle='#ffffff';
+  ctx.fillText(text,12,70);
+  const tex=new THREE.CanvasTexture(canvas);
+  const sprite=new THREE.Sprite(
+    new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false})
+  );
+  sprite.scale.set(3.2,.65,1);
+  return sprite;
+}
+
+function addArrow(group,origin,direction,length,color,label){
+  const arrow=new THREE.ArrowHelper(
+    direction.clone().normalize(),origin,length,color,.5,.25
+  );
+  group.add(arrow);
+  if(label){
+    const s=textSprite(label);
+    s.position.copy(origin.clone().add(direction.clone().normalize().multiplyScalar(length+.35)));
+    group.add(s);
+  }
+}
+
+function init3D(){
+  const box=document.getElementById('viewer3d');
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x02070d);
+
+  camera=new THREE.PerspectiveCamera(
+    45,box.clientWidth/box.clientHeight,.1,1000
+  );
+  camera.position.set(23,13,22);
+
+  renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(box.clientWidth,box.clientHeight);
+  box.appendChild(renderer.domElement);
+
+  controls=new THREE.OrbitControls(camera,renderer.domElement);
+  controls.enableDamping=true;
+  controls.target.set(0,2,0);
+
+  scene.add(new THREE.HemisphereLight(0xdff4ff,0x152337,1.25));
+  const dl=new THREE.DirectionalLight(0xffffff,1.45);
+  dl.position.set(15,25,15);scene.add(dl);
+
+  structureGroup=new THREE.Group();
+  forceGroup=new THREE.Group();
+  loadGroup=new THREE.Group();
+  scene.add(structureGroup,forceGroup,loadGroup);
+
+  rebuild3D();
+
+  const grid=new THREE.GridHelper(34,34,0x1d354d,0x102338);
+  grid.position.y=-.35;scene.add(grid);
+
+  function loop(){
+    requestAnimationFrame(loop);
+    if(running)clock+=.018;
+    animateLoads();
+    controls.update();
+    renderer.render(scene,camera);
+  }
+  loop();
+}
+
+function rebuild3D(){
+  if(!structureGroup)return;
+  clearGroup(structureGroup);
+  clearGroup(forceGroup);
+  clearGroup(loadGroup);
+
+  const half=L/2;
+  const deckY=0;
+  const topY=f+.45;
+  const cableY=deckY+.30;
+
+  /* dalle */
+  const slab=new THREE.Mesh(
+    new THREE.BoxGeometry(L,.45,W),
+    mat(0x8b99a9,.05,.62)
+  );
+  slab.position.y=deckY;
+  structureGroup.add(slab);
+
+  /* bord supérieur */
+  const edge=new THREE.Mesh(
+    new THREE.BoxGeometry(L+.10,.08,W+.10),
+    mat(0x354a60,.15,.5)
+  );
+  edge.position.y=.26;
+  structureGroup.add(edge);
+
+  /* appuis / mâts */
+  [-half,half].forEach(x=>{
+    [-W/2,W/2].forEach(z=>{
+      const p=new THREE.Mesh(
+        new THREE.BoxGeometry(.5,topY+1,.5),
+        mat(0x41566c,.25,.45)
+      );
+      p.position.set(x,(topY+1)/2,z);
+      structureGroup.add(p);
+
+      const cap=new THREE.Mesh(
+        new THREE.BoxGeometry(.8,.16,.8),
+        mat(0x71859a,.15,.4)
+      );
+      cap.position.set(x,topY,z);
+      structureGroup.add(cap);
+    });
+  });
+
+  /* deux câbles */
+  [-W/2,W/2].forEach(z=>{
+    const pts=[];
+    for(let i=0;i<=100;i++){
+      const x=-half+L*i/100;
+      const y=cableY+f*Math.pow(x/half,2);
+      pts.push(new THREE.Vector3(x,y,z));
+    }
+    const curve=new THREE.CatmullRomCurve3(pts);
+    const tube=new THREE.Mesh(
+      new THREE.TubeGeometry(curve,120,.075,10,false),
+      mat(0x45d7ff,.82,.25)
+    );
+    structureGroup.add(tube);
+
+    /* suspentes */
+    for(let i=1;i<14;i++){
+      const x=-half+L*i/14;
+      const y=cableY+f*Math.pow(x/half,2);
+      const geo=new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(x,y,z),
+        new THREE.Vector3(x,.25,z)
+      ]);
+      structureGroup.add(
+        new THREE.Line(
+          geo,
+          new THREE.LineBasicMaterial({color:0xc4d3df})
+        )
+      );
+    }
+  });
+
+  /* charges réparties */
+  if(showLoads){
+    for(let x=-half+.55;x<half-.2;x+=1.05){
+      for(let z=-W/2+.42;z<W/2-.05;z+=.65){
+        addArrow(
+          loadGroup,
+          new THREE.Vector3(x,.55,z),
+          new THREE.Vector3(0,-1,0),
+          .55,
+          0xffb84d,
+          ''
+        );
+      }
+    }
+  }
+
+  /* forces aux deux extrémités de chacun des deux câbles */
+  if(showForces){
+    const c=calc();
+    [-W/2,W/2].forEach(z=>{
+      const origin=new THREE.Vector3(half,topY,z);
+
+      /* T vers le milieu du câble */
+      addArrow(
+        forceGroup,origin,
+        new THREE.Vector3(-Math.cos(c.theta),-Math.sin(c.theta),0),
+        3.15,0xff5c6c,'T = '+T.toFixed(0)+' kN'
+      );
+
+      /* V */
+      addArrow(
+        forceGroup,origin,
+        new THREE.Vector3(0,-1,0),
+        2.15,0x37e49b,'V = '+c.V.toFixed(1)+' kN'
+      );
+
+      /* H */
+      addArrow(
+        forceGroup,origin,
+        new THREE.Vector3(-1,0,0),
+        2.55,0x45d7ff,'H = '+c.H.toFixed(1)+' kN'
+      );
+    });
+  }
+}
+
+function animateLoads(){
+  if(!loadGroup)return;
+  loadGroup.children.forEach((obj,i)=>{
+    if(obj instanceof THREE.ArrowHelper){
+      obj.position.y=.55+Math.sin(clock+i*.15)*.05;
+    }
+  });
+}
+
+function resetCamera(){
+  if(!camera||!controls)return;
+  camera.position.set(23,13,22);
+  controls.target.set(0,2,0);
+  controls.update();
+}
+
+function focusForces(){
+  if(!camera||!controls)return;
+  camera.position.set(14,8,12);
+  controls.target.set(L/2,3,0);
+  controls.update();
+  if(!showForces){
+    showForces=true;
+    forcesBtn.textContent=isEnglish?'Forces: ON':'Forces : ON';
+    rebuild3D();
+  }
+}
+
+function toggleForces(){
+  showForces=!showForces;
+  forcesBtn.textContent=isEnglish?
+    'Forces: '+(showForces?'ON':'OFF'):
+    'Forces : '+(showForces?'ON':'OFF');
+  rebuild3D();
+}
+
+function toggleLoads(){
+  showLoads=!showLoads;
+  loadsBtn.textContent=isEnglish?
+    'Load q: '+(showLoads?'ON':'OFF'):
+    'Charge q : '+(showLoads?'ON':'OFF');
+  rebuild3D();
+}
+
+function toggleAnimation(){
+  running=!running;
+  animationBtn.textContent=isEnglish?
+    (running?'⏸ Pause animation':'▶ Play animation'):
+    (running?'⏸ Pause animation':'▶ Lire animation');
+}
+
+/* =========================================================
+   VUES 2D
+========================================================= */
+function setView(mode){
+  currentView=mode;
+  ['tab3d','tabElevation','tabPlan'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  document.getElementById(mode==='3d'?'tab3d':mode==='elevation'?'tabElevation':'tabPlan').classList.add('active');
+
+  if(mode==='3d'){
+    viewer3d.style.display='block';
+    canvas2d.classList.add('hidden');
+  }else{
+    viewer3d.style.display='none';
+    canvas2d.classList.remove('hidden');
+    draw2D(mode);
+  }
+}
+
+function draw2D(mode){
+  const canvas=document.getElementById('canvas2d');
+  const rect=canvas.getBoundingClientRect();
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=Math.max(900,rect.width*dpr);
+  canvas.height=Math.max(620,rect.height*dpr);
+
+  const ctx=canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const w=rect.width,h=rect.height;
+
+  ctx.fillStyle='#02070d';
+  ctx.fillRect(0,0,w,h);
+
+  if(mode==='elevation')drawElevation(ctx,w,h);
+  else drawPlan(ctx,w,h);
+}
+
+function line2(ctx,x1,y1,x2,y2,color,width=2,dash=[]){
+  ctx.save();
+  ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  ctx.restore();
+}
+
+function arrow2(ctx,x1,y1,x2,y2,color,text=''){
+  line2(ctx,x1,y1,x2,y2,color,3);
+  const a=Math.atan2(y2-y1,x2-x1),s=10;
+  ctx.fillStyle=color;
+  ctx.beginPath();
+  ctx.moveTo(x2,y2);
+  ctx.lineTo(x2-s*Math.cos(a-.5),y2-s*Math.sin(a-.5));
+  ctx.lineTo(x2-s*Math.cos(a+.5),y2-s*Math.sin(a+.5));
+  ctx.closePath();ctx.fill();
+  if(text){
+    ctx.font='bold 14px Segoe UI';
+    ctx.fillStyle=color;
+    ctx.fillText(text,x2+7,y2+4);
+  }
+}
+
+function drawElevation(ctx,w,h){
+  const left=90,right=w-90,deckY=h-125,top=95;
+  const span=right-left;
+  const sag=Math.min(205,span*.25);
+
+  ctx.font='bold 20px Segoe UI';ctx.fillStyle='#edf6ff';
+  ctx.fillText(isEnglish?'2D ELEVATION':'2D — VUE EN ÉLÉVATION',left,42);
+
+  /* dalle */
+  ctx.fillStyle='#7f8fa0';
+  ctx.fillRect(left,deckY,span,27);
+  ctx.strokeStyle='#b6c5d4';ctx.strokeRect(left,deckY,span,27);
+
+  /* pylônes */
+  ctx.fillStyle='#41566c';
+  ctx.fillRect(left-14,top,28,deckY-top);
+  ctx.fillRect(right-14,top,28,deckY-top);
+
+  /* câble */
+  ctx.beginPath();
+  ctx.strokeStyle='#45d7ff';ctx.lineWidth=5;
+  for(let i=0;i<=span;i++){
+    const nx=(i/span-.5)*2;
+    const y=top+sag*nx*nx;
+    if(i===0)ctx.moveTo(left+i,y);else ctx.lineTo(left+i,y);
+  }
+  ctx.stroke();
+
+  /* suspentes */
+  for(let i=1;i<15;i++){
+    const x=left+span*i/15;
+    const nx=(i/15-.5)*2;
+    const y=top+sag*nx*nx;
+    line2(ctx,x,y,x,deckY,'#c4d3df',1.4);
+  }
+
+  /* charge */
+  if(showLoads){
+    for(let x=left+15;x<right-10;x+=39){
+      arrow2(ctx,x,deckY-58,x,deckY-6,'#ffb84d','q');
+    }
+  }
+
+  /* forces */
+  if(showForces){
+    const c=calc();
+    arrow2(ctx,right,top,right-110,top+78,'#ff5c6c','T = '+T.toFixed(0)+' kN');
+    arrow2(ctx,right,top,right,top+95,'#37e49b','V = '+c.V.toFixed(1)+' kN');
+    arrow2(ctx,right,top,right-130,top,'#45d7ff','H = '+c.H.toFixed(1)+' kN');
+  }
+
+  ctx.font='14px Segoe UI';ctx.fillStyle='#a9bdd1';
+  ctx.fillText('L = '+L.toFixed(2)+' m',w/2-42,deckY+72);
+  ctx.fillText('f = '+f.toFixed(2)+' m',left-72,top+sag/2);
+  ctx.fillText(isEnglish?'Parabolic cable':'Câble parabolique',left+15,top-12);
+  ctx.fillText(isEnglish?'Hangers':'Suspentes',left+span*.39,top+sag*.58);
+  ctx.fillText(isEnglish?'R.C. slab':'Dalle B.A.',left+span*.45,deckY+49);
+}
+
+function drawPlan(ctx,w,h){
+  const x0=100,x1=w-100,mid=h/2,widthPx=Math.min(140,w*.25);
+
+  ctx.font='bold 20px Segoe UI';ctx.fillStyle='#edf6ff';
+  ctx.fillText(isEnglish?'2D PLAN':'2D — VUE EN PLAN',x0,42);
+
+  /* dalle */
+  ctx.fillStyle='#718295';
+  ctx.fillRect(x0,mid-widthPx/2,x1-x0,widthPx);
+  ctx.strokeStyle='#b6c5d4';
+  ctx.strokeRect(x0,mid-widthPx/2,x1-x0,widthPx);
+
+  /* deux câbles */
+  line2(ctx,x0,mid-widthPx/2,x1,mid-widthPx/2,'#45d7ff',5);
+  line2(ctx,x0,mid+widthPx/2,x1,mid+widthPx/2,'#45d7ff',5);
+
+  /* appuis */
+  ctx.fillStyle='#41566c';
+  [x0,x1].forEach(x=>{
+    ctx.fillRect(x-13,mid-widthPx/2-23,26,23);
+    ctx.fillRect(x-13,mid+widthPx/2,26,23);
+  });
+
+  /* dimensions */
+  line2(ctx,x0,mid-widthPx/2-60,x1,mid-widthPx/2-60,'#a9bdd1',1,[5,5]);
+  ctx.font='14px Segoe UI';ctx.fillStyle='#a9bdd1';
+  ctx.fillText('L = '+L.toFixed(2)+' m',(x0+x1)/2-45,mid-widthPx/2-72);
+
+  line2(ctx,x1+55,mid-widthPx/2,x1+55,mid+widthPx/2,'#a9bdd1',1,[5,5]);
+  ctx.save();
+  ctx.translate(x1+78,mid);ctx.rotate(-Math.PI/2);
+  ctx.fillText('3,35 m',-24,0);
+  ctx.restore();
+
+  ctx.fillStyle='#edf6ff';
+  ctx.fillText(isEnglish?'Cable 1':'Câble 1',x0+15,mid-widthPx/2-9);
+  ctx.fillText(isEnglish?'Cable 2':'Câble 2',x0+15,mid+widthPx/2+28);
+
+  /* forces en plan : H opposées */
+  if(showForces){
+    const c=calc();
+    arrow2(ctx,x1,mid-widthPx/2,x1-115,mid-widthPx/2,'#45d7ff','H');
+    arrow2(ctx,x1,mid+widthPx/2,x1-115,mid+widthPx/2,'#45d7ff','H');
+    ctx.font='12px Segoe UI';ctx.fillStyle='#a9bdd1';
+    ctx.fillText('Deux câbles longitudinaux',x0+20,mid+widthPx/2+60);
+  }
+}
+
+/* =========================================================
+   LANGUE
+========================================================= */
+function toggleLanguage(){
+  isEnglish=!isEnglish;
+  document.documentElement.lang=isEnglish?'en':'fr';
+  document.getElementById('langBtn').textContent=isEnglish?'FR':'EN';
+
+  document.querySelectorAll('[data-fr]').forEach(el=>{
+    el.innerHTML=isEnglish?el.getAttribute('data-en'):el.getAttribute('data-fr');
+  });
+
+  if(currentView!=='3d')draw2D(currentView);
+  updateNumbers();
+}
+
+function scrollToId(id){
+  document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function toast(message){
+  const t=document.getElementById('toast');
+  t.textContent=message;t.style.display='block';
+  clearTimeout(toast.timer);
+  toast.timer=setTimeout(()=>t.style.display='none',1800);
+}
+
+/* =========================================================
+   PARAMETRES
+========================================================= */
+document.getElementById('Lrange').addEventListener('input',e=>{
+  L=+e.target.value;updateNumbers();
+  if(currentView==='3d')rebuild3D();else draw2D(currentView);
+});
+document.getElementById('frange').addEventListener('input',e=>{
+  f=+e.target.value;updateNumbers();
+  if(currentView==='3d')rebuild3D();else draw2D(currentView);
+});
+document.getElementById('Trange').addEventListener('input',e=>{
+  T=+e.target.value;updateNumbers();
+  if(currentView==='3d')rebuild3D();else draw2D(currentView);
+});
+
+window.addEventListener('resize',()=>{
+  if(currentView==='3d' && renderer){
+    const box=document.getElementById('viewer3d');
+    camera.aspect=box.clientWidth/box.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(box.clientWidth,box.clientHeight);
+  }else if(currentView!=='3d')draw2D(currentView);
+});
+
+window.addEventListener('load',()=>{
+  updateNumbers();
+  init3D();
+});
+</script>
+
+</body>
+</html>

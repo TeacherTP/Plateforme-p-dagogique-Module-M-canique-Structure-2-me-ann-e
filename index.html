@@ -4182,72 +4182,114 @@ Ouvrir
    TD
 ========================================================= */
 
+/* =========================================================
+   TD — Nombre d'exercices par chapitre
+========================================================= */
+
+const TD_EXERCISES = {
+
+    1: 10,   // Chapter I  — 10 exercices
+    2: 8,    // Chapter II — 8 exercices
+    3: 10,   // Chapter III
+    4: 10,   // Chapter IV
+    5: 10,   // Chapter V
+    6: 10    // Chapter VI
+
+};
+
+
+/* =========================================================
+   TD — Ouvre le fichier HTML de la solution du TD
+========================================================= */
+
 function openTD(id){
 
-const chapter =
-chapters.find(
-x=>x.id===id
-);
+    const chapter =
+    chapters.find(
+    x=>x.id===id
+    );
+
+    /* Nom du fichier : td/chapitre-02-td.html, ... */
+    const filename =
+    `td/chapitre-${String(id).padStart(2,"0")}-td.html`;
 
 
-openModal(`
-
-<h2>
-🧮 TD & Applications
-</h2>
-
-<h3>
-${chapter.titleFR}
-</h3>
+    const nbExercices =
+    TD_EXERCISES[id] || 10;
 
 
-<div class="card">
+    /* Génération automatique des cartes exercices */
+    let cardsHTML = "";
 
-<h3>
-Exercice 01
-</h3>
+    for(
+    let i=1;
+    i<=nbExercices;
+    i++
+    ){
 
-<p>
-Application fondamentale du chapitre.
-</p>
+        cardsHTML += `
 
-<button
-class="btn btn-primary"
-onclick="
-alert('Solution de l’exercice')">
+        <div class="resource-card">
 
-Voir la solution
+        <div class="resource-icon">
+        🧮
+        </div>
 
-</button>
+        <h3>
+        Exercice ${String(i).padStart(2,"0")}
+        </h3>
 
-</div>
+        <p>
+        Application du chapitre.
+        </p>
+
+        <a
+        class="btn btn-primary"
+        href="${filename}#exercice-${i}"
+        target="_blank"
+        rel="noopener">
+
+        Voir la solution
+
+        </a>
+
+        </div>
+
+        `;
+
+    }
 
 
-<div class="card">
+    openModal(`
 
-<h3>
-Exercice 02
-</h3>
+    <h2>
+    🧮 TD & Applications
+    </h2>
 
-<p>
-Application numérique.
-</p>
+    <h3>
+    ${chapter.titleFR}
+    </h3>
 
-<button
-class="btn btn-primary"
-onclick="
-alert('Solution de l’exercice')">
+    <div class="card">
 
-Voir la solution
+    <p>
+    <strong>
+    ${nbExercices} exercices
+    </strong>
+    — cliquez pour ouvrir la solution HTML.
+    </p>
 
-</button>
+    <div class="grid grid-2">
 
-</div>
+    ${cardsHTML}
 
-`);
+    </div>
+
+    </div>
+
+    `);
 
 }
-
 
 /* =========================================================
    PDF
